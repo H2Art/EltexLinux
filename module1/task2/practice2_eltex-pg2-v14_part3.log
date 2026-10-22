@@ -169,6 +169,45 @@ root@eltex-practice2-pg2-v14:~/EltexLinux# mkdir -p module1/task1
 root@eltex-practice2-pg2-v14:~/EltexLinux# mkdir module1/task2
 root@eltex-practice2-pg2-v14:~/EltexLinux# mkdir module1/task3
 
+root@eltex-practice2-pg2-v14:~/EltexLinux# git add .
+root@eltex-practice2-pg2-v14:~/EltexLinux# git status
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+        new file:   module1/task1/eltex-pg2-v14_part2.log
+        new file:   module1/task1/eltex-pg2-v14_part3.log
+        new file:   module1/task1/eltex-pg2-v14_part3_gt20M.log
+        new file:   module1/task1/report_part1.txt
+        new file:   module1/task2/20s.log
+        new file:   module1/task2/history_formatted.log
+        new file:   module1/task2/modified_auth.log
+        new file:   module1/task2/practice2_eltex-pg2-v14_part1.log
+        new file:   module1/task2/practice2_eltex-pg2-v14_part2.log
+        new file:   module1/task2/practice2_eltex-pg2-v14_part3.log
+root@eltex-practice2-pg2-v14:~/EltexLinux# git commit -m "first and second practices"
+[main a54af7d] first and second practices
+ 10 files changed, 3317 insertions(+)
+ create mode 100644 module1/task1/eltex-pg2-v14_part2.log
+ create mode 100644 module1/task1/eltex-pg2-v14_part3.log
+ create mode 100644 module1/task1/eltex-pg2-v14_part3_gt20M.log
+ create mode 100644 module1/task1/report_part1.txt
+ create mode 100644 module1/task2/20s.log
+ create mode 100644 module1/task2/history_formatted.log
+ create mode 100644 module1/task2/modified_auth.log
+ create mode 100644 module1/task2/practice2_eltex-pg2-v14_part1.log
+ create mode 100644 module1/task2/practice2_eltex-pg2-v14_part2.log
+ create mode 100644 module1/task2/practice2_eltex-pg2-v14_part3.log
+root@eltex-practice2-pg2-v14:~/EltexLinux# git push
+Enumerating objects: 16, done.
+Counting objects: 100% (16/16), done.
+Delta compression using up to 2 threads
+Compressing objects: 100% (15/15), done.
+Writing objects: 100% (15/15), 34.76 KiB | 11.59 MiB/s, done.
+Total 15 (delta 0), reused 0 (delta 0), pack-reused 0
+To https://github.com/H2Art/EltexLinux.git
+   5077c7a..a54af7d  main -> main
 
 #10
 
