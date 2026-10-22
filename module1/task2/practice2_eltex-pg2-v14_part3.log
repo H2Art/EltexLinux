@@ -209,5 +209,131 @@ Total 15 (delta 0), reused 0 (delta 0), pack-reused 0
 To https://github.com/H2Art/EltexLinux.git
    5077c7a..a54af7d  main -> main
 
-#10
+#10-12
+root@eltex-practice2-pg2-v14:~/EltexLinux# mkdir ~/EltexLinux_clone && cd ~/EltexLinux_clone
+root@eltex-practice2-pg2-v14:~/EltexLinux_clone# git clone https://github.com/H2Art/EltexLinux.git .
+Cloning into '.'...
+remote: Enumerating objects: 18, done.
+remote: Counting objects: 100% (18/18), done.
+remote: Compressing objects: 100% (16/16), done.
+remote: Total 18 (delta 0), reused 18 (delta 0), pack-reused 0 (from 0)
+Receiving objects: 100% (18/18), 34.95 KiB | 34.95 MiB/s, done.
+root@eltex-practice2-pg2-v14:~/EltexLinux_clone# cd ~/EltexLinux
+root@eltex-practice2-pg2-v14:~/EltexLinux# echo "test change" >> test.txt
+root@eltex-practice2-pg2-v14:~/EltexLinux# git add .
+root@eltex-practice2-pg2-v14:~/EltexLinux# git commit -m "test change"
+[main be6d3d7] test change
+ 2 files changed, 40 insertions(+)
+ create mode 100644 test.txt
+root@eltex-practice2-pg2-v14:~/EltexLinux# git push
+Enumerating objects: 10, done.
+Counting objects: 100% (10/10), done.
+Delta compression using up to 2 threads
+Compressing objects: 100% (5/5), done.
+Writing objects: 100% (6/6), 1.00 KiB | 1.00 MiB/s, done.
+Total 6 (delta 2), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
+To https://github.com/H2Art/EltexLinux.git
+   a54af7d..be6d3d7  main -> main
+root@eltex-practice2-pg2-v14:~/EltexLinux# cd ~/EltexLinux_clone
+root@eltex-practice2-pg2-v14:~/EltexLinux_clone# git fetch
+remote: Enumerating objects: 10, done.
+remote: Counting objects: 100% (10/10), done.
+remote: Compressing objects: 100% (3/3), done.
+remote: Total 6 (delta 2), reused 6 (delta 2), pack-reused 0 (from 0)
+Unpacking objects: 100% (6/6), 1005 bytes | 1005.00 KiB/s, done.
+From https://github.com/H2Art/EltexLinux
+   a54af7d..be6d3d7  main       -> origin/main
+root@eltex-practice2-pg2-v14:~/EltexLinux_clone# git log origin/main
+commit be6d3d7dbe717b6d293a809108e590f11007dc17 (origin/main, origin/HEAD)
+Author: H2Art <artur.vulf.05@mail.ru>
+Date:   Thu Oct 22 15:11:59 2026 +0000
 
+    test change
+
+Date:   Thu Oct 22 15:04:05 2026 +0000
+
+    first and second practices
+
+commit 5077c7a95e2521604af8253d7b70183266ca1d48
+Author: H2Art <artur.vulf.05@mail.ru>
+Date:   Thu Oct 22 13:59:18 2026 +0000
+
+    first commit
+root@eltex-practice2-pg2-v14:~/EltexLinux_clone# git diff main origin/main
+diff --git a/module1/task2/practice2_eltex-pg2-v14_part3.log b/module1/task2/practice2_eltex-pg2-v14_part3.log
+index 7605d58..2d4ac8c 100644
+--- a/module1/task2/practice2_eltex-pg2-v14_part3.log
++++ b/module1/task2/practice2_eltex-pg2-v14_part3.log
+@@ -169,6 +169,45 @@ root@eltex-practice2-pg2-v14:~/EltexLinux# mkdir -p module1/task1
+ root@eltex-practice2-pg2-v14:~/EltexLinux# mkdir module1/task2
+ root@eltex-practice2-pg2-v14:~/EltexLinux# mkdir module1/task3
+
++root@eltex-practice2-pg2-v14:~/EltexLinux# git add .
++root@eltex-practice2-pg2-v14:~/EltexLinux# git status
++On branch main
+diff --git a/module1/task2/practice2_eltex-pg2-v14_part3.log b/module1/task2/practice2_eltex-pg2-v14_part3.log
+index 7605d58..2d4ac8c 100644
+--- a/module1/task2/practice2_eltex-pg2-v14_part3.log
++++ b/module1/task2/practice2_eltex-pg2-v14_part3.log
+@@ -169,6 +169,45 @@ root@eltex-practice2-pg2-v14:~/EltexLinux# mkdir -p module1/task1
+ root@eltex-practice2-pg2-v14:~/EltexLinux# mkdir module1/task2
+ root@eltex-practice2-pg2-v14:~/EltexLinux# mkdir module1/task3
+
++root@eltex-practice2-pg2-v14:~/EltexLinux# git add .
++root@eltex-practice2-pg2-v14:~/EltexLinux# git status
++On branch main
+ root@eltex-practice2-pg2-v14:~/EltexLinux# mkdir module1/task3
+
++root@eltex-practice2-pg2-v14:~/EltexLinux# git add .
++root@eltex-practice2-pg2-v14:~/EltexLinux# git status
++On branch main
++Your branch is up to date with 'origin/main'.
++
++Changes to be committed:
++  (use "git restore --staged <file>..." to unstage)
++        new file:   module1/task1/eltex-pg2-v14_part2.log
++        new file:   module1/task1/eltex-pg2-v14_part3.log
++        new file:   module1/task1/eltex-pg2-v14_part3_gt20M.log
++        new file:   module1/task1/report_part1.txt
++        new file:   module1/task2/20s.log
++        new file:   module1/task2/history_formatted.log
++        new file:   module1/task2/modified_auth.log
++        new file:   module1/task2/practice2_eltex-pg2-v14_part1.log
++        new file:   module1/task2/practice2_eltex-pg2-v14_part2.log
++        new file:   module1/task2/practice2_eltex-pg2-v14_part3.log
++root@eltex-practice2-pg2-v14:~/EltexLinux# git commit -m "first and second practices"
++[main a54af7d] first and second practices
++ 10 files changed, 3317 insertions(+)
++ create mode 100644 module1/task1/eltex-pg2-v14_part2.log
++ create mode 100644 module1/task1/eltex-pg2-v14_part3.log
++ create mode 100644 module1/task1/eltex-pg2-v14_part3_gt20M.log
++ create mode 100644 module1/task1/report_part1.txt
++ create mode 100644 module1/task2/20s.log
++ create mode 100644 module1/task2/history_formatted.log
++ create mode 100644 module1/task2/modified_auth.log
++ create mode 100644 module1/task2/practice2_eltex-pg2-v14_part1.log
++ create mode 100644 module1/task2/practice2_eltex-pg2-v14_part2.log
++ create mode 100644 module1/task2/practice2_eltex-pg2-v14_part3.log
++root@eltex-practice2-pg2-v14:~/EltexLinux# git push
++Enumerating objects: 16, done.
++Counting objects: 100% (16/16), done.
++Delta compression using up to 2 threads
++Compressing objects: 100% (15/15), done.
++Writing objects: 100% (15/15), 34.76 KiB | 11.59 MiB/s, done.
++Total 15 (delta 0), reused 0 (delta 0), pack-reused 0
++To https://github.com/H2Art/EltexLinux.git
++   5077c7a..a54af7d  main -> main
+
+
+diff --git a/test.txt b/test.txt
+new file mode 100644
+root@eltex-practice2-pg2-v14:~/EltexLinux_clone# git merge origin/main
+Updating a54af7d..be6d3d7
+Fast-forward
+ module1/task2/practice2_eltex-pg2-v14_part3.log | 39 +++++++++++++++++++++++++++++++++++++++
+ test.txt                                        |  1 +
+ 2 files changed, 40 insertions(+)
+ create mode 100644 test.txt
+
+# Part 3 done!
