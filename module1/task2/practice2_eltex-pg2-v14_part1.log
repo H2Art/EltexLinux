@@ -1,0 +1,378 @@
+#1
+
+eltex-pg2-v14@eltex-2026-autumn-17:50> ssh-key
+ssh-keygen   ssh-keyscan  
+eltex-pg2-v14@eltex-2026-autumn-17:50> ssh-keygen
+Generating public/private rsa key pair.
+Enter file in which to save the key (/home/eltex-pg2-v14/.ssh/id_rsa): keypr2
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in keypr2
+Your public key has been saved in keypr2.pub
+The key fingerprint is:
+SHA256:WaZ0n9un8PPshE53lDVI1cJRv45kioGWL2Sg8hM23F4 eltex-pg2-v14@eltex-2026-autumn
+The keys randomart image is:
++---[RSA 3072]----+
+|             oo+o|
+|            . + o|
+|     .  . +  . oo|
+|  . o ..o* . .  =|
+| . * . ES.  oo o.|
+|  + + = . o +ooo |
+|   o . . o .o.+.=|
+|    .   .    =.*.|
+|              +++|
++----[SHA256]-----+ 
+#2
+
+eltex-pg2-v14@eltex-2026-autumn-18:12> ssh-copy-id -i ~/.ssh/keypr2.pub root@172.16.9.214
+/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/home/eltex-pg2-v14/.ssh/keypr2.pub"
+The authenticity of host '172.16.9.214 (172.16.9.214)' can't be established.
+ED25519 key fingerprint is SHA256:YNVzj+RtetZfXv5XUn/CUjeEcaMD4eg3jy8EuGGIS+o.
+This key is not known by any other names.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+root@172.16.9.214's password: 
+
+Number of key(s) added: 1
+
+Now try logging into the machine, with:   "ssh 'root@172.16.9.214'"
+and check to make sure that only the key(s) you wanted were added.
+
+#3
+
+
+#Connection command: ssh root@172.16.9.214
+
+#Server2 (root) authorized_keys data and permissions:
+root@eltex-practice2-pg2-v14:~/.ssh# cat authorized_keys 
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDMXpyUkkEUGYBrbm1gIvKYql84mhzWhTv82nC82fnsxhp21GlctU/uP1t4ZImXgDwnxpRUYft+O1H6ngeDrEYlnxhFDeHdvU5DKxFHm4yoBq/DbFQpKDqd1rykEt9Xm+Vi3MPcGjiO85TPB05vRDkWYX3qpQPQh+N1OD5czAm43/caRNNaimM8JNAV002Sf6tPBj+2x9+2mfcmH3yK0aMB0Y9cx4iJ9+tMJk6568egDIF9xnWUK8EhIphlijMSOEvGBaH+it0ardsZ/JpZmXpRvJTNLa0aMLikS2kkCe5dCX0taYHxVKhc5dmfPK4tou/WbC+9HESlXOV8mlQj6EFt7hVx3f03pUxILfWCVd/ZEn+rxdqbLlVTy4eMK6inUtUzn27AIdkbQ734L5+reiBZwI+Jv9ceWXnaRI4sg+sFnxiQECzOMY2T4Si0wRUsFPFL7AXydG7paxTQt0P7Os01f8a9rPCfMK2QflLbS7swONaBc0/rkSphmofu/PxtHNE= eltex-pg2-v14@eltex-2026-autumn
+
+root@eltex-practice2-pg2-v14:~/.ssh# ls -l authorized_keys 
+-rw------- 1 root root 585 Oct 14 11:12 authorized_keys
+
+#Server1 keypr2.pub data and permissions:
+eltex-pg2-v14@eltex-2026-autumn-18:46> ls -l .ssh/keypr2.pub 
+-rw-r--r-- 1 eltex-pg2-v14 eltex-pg2-v14 585 окт 14 17:52 .ssh/keypr2.pub
+
+eltex-pg2-v14@eltex-2026-autumn-18:39> cat .ssh/keypr2.pub 
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDMXpyUkkEUGYBrbm1gIvKYql84mhzWhTv82nC82fnsxhp21GlctU/uP1t4ZImXgDwnxpRUYft+O1H6ngeDrEYlnxhFDeHdvU5DKxFHm4yoBq/DbFQpKDqd1rykEt9Xm+Vi3MPcGjiO85TPB05vRDkWYX3qpQPQh+N1OD5czAm43/caRNNaimM8JNAV002Sf6tPBj+2x9+2mfcmH3yK0aMB0Y9cx4iJ9+tMJk6568egDIF9xnWUK8EhIphlijMSOEvGBaH+it0ardsZ/JpZmXpRvJTNLa0aMLikS2kkCe5dCX0taYHxVKhc5dmfPK4tou/WbC+9HESlXOV8mlQj6EFt7hVx3f03pUxILfWCVd/ZEn+rxdqbLlVTy4eMK6inUtUzn27AIdkbQ734L5+reiBZwI+Jv9ceWXnaRI4sg+sFnxiQECzOMY2T4Si0wRUsFPFL7AXydG7paxTQt0P7Os01f8a9rPCfMK2QflLbS7swONaBc0/rkSphmofu/PxtHNE= eltex-pg2-v14@eltex-2026-autumn
+
+#As we can see, data are equal, but permissions are different.
+
+#4
+
+root@eltex-practice2-pg2-v14:~/.ssh# useradd user1 --create-home --shell /bin/bash
+root@eltex-practice2-pg2-v14:~/.ssh# passwd user1
+New password: #123user1
+Retype new password: #123user1
+passwd: password updated successfully
+
+#5
+
+root@eltex-practice2-pg2-v14:~/.ssh# adduser user2
+info: Adding user `user2' ...
+info: Selecting UID/GID from range 1000 to 59999 ...
+info: Adding new group `user2' (1002) ...
+info: Adding new user `user2' (1002) with group `user2 (1002)' ...
+info: Creating home directory `/home/user2' ...
+info: Copying files from `/etc/skel' ...
+New password: 
+Retype new password: 
+passwd: password updated successfully
+Changing the user information for user2
+Enter the new value, or press ENTER for the default
+        Full Name []: 
+        Room Number []: 
+        Work Phone []: 
+        Home Phone []: 
+        Other []: 
+Is the information correct? [Y/n] y
+info: Adding new user `user2' to supplemental / extra groups `users' ...
+info: Adding user `user2' to group `users' ...
+root@eltex-practice2-pg2-v14:~/.ssh# adduser user3
+info: Adding user `user3' ...
+info: Selecting UID/GID from range 1000 to 59999 ...
+info: Adding new group `user3' (1003) ...
+info: Adding new user `user3' (1003) with group `user3 (1003)' ...
+info: Creating home directory `/home/user3' ...
+info: Copying files from `/etc/skel' ...
+New password: 
+Retype new password: 
+passwd: password updated successfully
+Changing the user information for user3
+Enter the new value, or press ENTER for the default
+        Full Name []: 
+        Room Number []: 
+        Work Phone []: 
+        Home Phone []: 
+        Other []: 
+Is the information correct? [Y/n] y
+info: Adding new user `user3' to supplemental / extra groups `users' ...
+info: Adding user `user3' to group `users' ...
+
+#6
+
+root@eltex-practice2-pg2-v14:~/.ssh# usermod user3 --shell /usr/sbin/nologin
+
+root@eltex-practice2-pg2-v14:~/.ssh# su user3
+This account is currently not available.
+root@eltex-practice2-pg2-v14:~/.ssh# su user3 --shell /bin/bash
+user3@eltex-practice2-pg2-v14:/root/.ssh$ logout
+bash: logout: not login shell: use `exit'
+user3@eltex-practice2-pg2-v14:/root/.ssh$ exit
+exit
+root@eltex-practice2-pg2-v14:~/.ssh#  
+
+#7
+
+root@eltex-practice2-pg2-v14:~/.ssh# groupadd myusers
+
+root@eltex-practice2-pg2-v14:~/.ssh# usermod -a -G myusers user1
+root@eltex-practice2-pg2-v14:~/.ssh# usermod -a -G myusers user2
+root@eltex-practice2-pg2-v14:~/.ssh# usermod -a -G myusers user3
+
+root@eltex-practice2-pg2-v14:~/.ssh# getent group myusers 
+myusers:x:1004:user1,user2,user3
+
+root@eltex-practice2-pg2-v14:~/.ssh# groups user1
+user1 : user1 myusers
+root@eltex-practice2-pg2-v14:~/.ssh# groups user2
+user2 : user2 users myusers
+root@eltex-practice2-pg2-v14:~/.ssh# groups user3
+user3 : user3 users myusers
+
+#9
+
+root@eltex-practice2-pg2-v14:~/.ssh# mkdir /opt/share   
+root@eltex-practice2-pg2-v14:~/.ssh# chgrp myusers /opt/share/
+root@eltex-practice2-pg2-v14:/home/user1# chmod g+s /opt/share/
+root@eltex-practice2-pg2-v14:/home/user1# chmod g=rwx /opt/share/
+#10
+root@eltex-practice2-pg2-v14:~# cd /home/user1
+root@eltex-practice2-pg2-v14:/home/user1# vi .profile
+#added 'umask 007'
+
+#11
+
+root@eltex-practice2-pg2-v14:/home/user1# su user1
+user1@eltex-practice2-pg2-v14:~$ cd /opt/share
+user1@eltex-practice2-pg2-v14:/opt/share$ touch file1
+user1@eltex-practice2-pg2-v14:/opt/share$ exit
+exit
+root@eltex-practice2-pg2-v14:/home/user1# su user2
+user2@eltex-practice2-pg2-v14:/home/user1$ cd /opt/share
+user2@eltex-practice2-pg2-v14:/opt/share$ touch file2
+user2@eltex-practice2-pg2-v14:/opt/share$ exit
+exit
+root@eltex-practice2-pg2-v14:/home/user1# su user3 --shell /bin/bash
+user3@eltex-practice2-pg2-v14:/home/user1$ cd /opt/share/
+user3@eltex-practice2-pg2-v14:/opt/share$ touch file3
+user3@eltex-practice2-pg2-v14:/opt/share$ ls
+file1  file2  file3
+user3@eltex-practice2-pg2-v14:/opt/share$ rm file1
+user3@eltex-practice2-pg2-v14:/opt/share$ ls
+file2  file3
+user3@eltex-practice2-pg2-v14:/opt/share$ exit
+exit
+root@eltex-practice2-pg2-v14:/home/user1# su user1
+user1@eltex-practice2-pg2-v14:~$ cd /opt/share/
+user1@eltex-practice2-pg2-v14:/opt/share$ ls
+file2  file3
+user1@eltex-practice2-pg2-v14:/opt/share$ rm file2
+user1@eltex-practice2-pg2-v14:/opt/share$ exit
+exit
+root@eltex-practice2-pg2-v14:/home/user1# su user2
+user2@eltex-practice2-pg2-v14:/home/user1$ cd /opt/share
+user2@eltex-practice2-pg2-v14:/opt/share$ rm file3
+
+#12
+
+root@eltex-practice2-pg2-v14:/home/user1# chmod +t /opt/share
+root@eltex-practice2-pg2-v14:/home/user1# su user1
+user1@eltex-practice2-pg2-v14:~$ exit
+exit
+root@eltex-practice2-pg2-v14:/home/user1# cd /opt/share
+root@eltex-practice2-pg2-v14:/opt/share# su user1
+user1@eltex-practice2-pg2-v14:/opt/share$ ls
+user1@eltex-practice2-pg2-v14:/opt/share$ touch file1
+user1@eltex-practice2-pg2-v14:/opt/share$ exit
+exit
+root@eltex-practice2-pg2-v14:/opt/share# su user2
+user2@eltex-practice2-pg2-v14:/opt/share$ touch file2
+user2@eltex-practice2-pg2-v14:/opt/share$ exit
+exit
+root@eltex-practice2-pg2-v14:/opt/share# su user3 --shell /bin/bash
+user3@eltex-practice2-pg2-v14:/opt/share$ touch file3
+user3@eltex-practice2-pg2-v14:/opt/share$ exit
+exit
+root@eltex-practice2-pg2-v14:/opt/share# su user1
+user1@eltex-practice2-pg2-v14:/opt/share$ ls
+file1  file2  file3
+user1@eltex-practice2-pg2-v14:/opt/share$ rm file2
+rm: cannot remove 'file2': Operation not permitted
+user1@eltex-practice2-pg2-v14:/opt/share$ rm file3
+rm: cannot remove 'file3': Operation not permitted
+user1@eltex-practice2-pg2-v14:/opt/share$ rm file1
+user1@eltex-practice2-pg2-v14:/opt/share$ exit
+exit
+root@eltex-practice2-pg2-v14:/opt/share# su user2
+user2@eltex-practice2-pg2-v14:/opt/share$ rm file3
+rm: cannot remove 'file3': Operation not permitted
+user2@eltex-practice2-pg2-v14:/opt/share$ rm file2
+user2@eltex-practice2-pg2-v14:/opt/share$ exit
+exit
+root@eltex-practice2-pg2-v14:/opt/share# su user3 --shell /bin/bash
+user3@eltex-practice2-pg2-v14:/opt/share$ rm file3
+user3@eltex-practice2-pg2-v14:/opt/share$ exit
+exit
+
+#13
+
+#user1
+
+
+visudo
+#added to sudoers file: 'user1   ALL=(ALL:ALL): /usr/bin/dmesg'
+#checking result
+user1@eltex-practice2-pg2-v14:/opt/share$ sudo dmesg | tail -5
+[   74.805059] audit: type=1400 audit(1792344184.466:120): apparmor="STATUS" operation="profile_replace" info="same as current profile, skipping" profile="unconfined" name="rsyslogd" pid=710 comm="apparmor_parser"
+[   78.758065] NET: Registered PF_QIPCRTR protocol family
+[   95.115140] loop0: detected capacity change from 0 to 8
+[  101.867386] audit: type=1400 audit(1792344211.934:121): apparmor="STATUS" operation="profile_replace" info="same as current profile, skipping" profile="unconfined" name="/usr/lib/snapd/snap-confine" pid=837 comm="apparmor_parser"
+[67734.094268] systemd-journald[308]: /var/log/journal/560b026a44d3424ea490d29e1a7e2775/user-1003.journal: Journal file uses a different sequence number ID, rotating.
+
+
+
+#user2
+touch /home/user2/user2_dmesg.sh
+chmod u+s user2_dmesg.sh
+chmod +x user2_dmesg.sh
+
+#changing permissions for binary file
+which dmesg
+/usr/bin/dmesg
+chmod u+s /usr/bin/dmesg
+#making script:
+
+"
+#!/bin/bash
+dmesg
+"
+
+su user2
+./user2_dmesg.sh #script works properly
+
+#14
+
+root@eltex-practice2-pg2-v14:/home/user2# chage -M 10 user1
+root@eltex-practice2-pg2-v14:/home/user2# chage -M 10 user2
+root@eltex-practice2-pg2-v14:/home/user2# chage -M 10 user3
+
+#15
+vi /etc/motd
+#added "Hello, Vulf Artur!"
+
+#16
+
+root@eltex-practice2-pg2-v14:~/etc_backup# rsync -a /etc/ /root/etc_backup/
+root@eltex-practice2-pg2-v14:~/etc_backup# ls
+adduser.conf                   credstore.encrypted   dpkg          host.conf        libaudit.conf   mdadm                newt              profile.d     screenrc       sudo.conf          update-manager
+alternatives                   cron.d                e2scrub.conf  hosts            libblockdev     mime.types           nftables.conf     protocols     security       sudoers            update-motd.d
+apparmor                       cron.daily            environment   hosts.allow      libibverbs.d    mke2fs.conf          nsswitch.conf     python3       selinux        sudoers.d          update-notifier
+apparmor.d                     cron.hourly           ethertypes    hosts.deny       libnl-3         ModemManager         opt               python3.12    sensors3.conf  sudo_logsrvd.conf  UPower
+apport                         cron.monthly          fonts         init.d           locale.alias    modprobe.d           os-release        qemu          sensors.d      supercat           usb_modeswitch.conf
+apt                            crontab               fstab         initramfs-tools  locale.conf     modules              overlayroot.conf  rc0.d         services       sysctl.conf        usb_modeswitch.d
+bash.bashrc                    cron.weekly           fuse.conf     inputrc          locale.gen      modules-load.d       PackageKit        rc1.d         sgml           sysctl.d           vconsole.conf
+bash_completion                cron.yearly           fwupd         iproute2         localtime       motd                 pam.conf          rc2.d         shadow         sysstat            vim
+bash_completion.d              cryptsetup-initramfs  gai.conf      iscsi            logcheck        mtab                 pam.d             rc3.d         shadow-        systemd            vmware-tools
+bindresvport.blacklist         crypttab              gnutls        issue            login.defs      multipath            passwd            rc4.d         shells         terminfo           vtrgb
+binfmt.d                       dbus-1                groff         issue.net        logrotate.conf  multipath.conf       passwd-           rc5.d         skel           thermald           wgetrc
+byobu                          debconf.conf          group         kernel           logrotate.d     nanorc               perl              rc6.d         sos            timezone           X11
+ca-certificates                debian_version        group-        landscape        lsb-release     needrestart          pki               rcS.d         ssh            tmpfiles.d         xattr.conf
+ca-certificates.conf           default               grub.d        ldap             lvm             netconfig            plymouth          resolv.conf   ssl            ubuntu-advantage   xdg
+ca-certificates.conf.dpkg-old  deluser.conf          gshadow       ld.so.cache      machine-id      netplan              pm                rmt           subgid         ucf.conf           xml
+cloud                          depmod.d              gshadow-      ld.so.conf       magic           network              polkit-1          rpc           subgid-        udev               zsh_command_not_found
+console-setup                  dhcp                  gss           ld.so.conf.d     magic.mime      networkd-dispatcher  pollinate         rsyslog.conf  subuid         udisks2
+credstore                      dhcpcd.conf           hdparm.conf   legal            manpath.config  networks             profile           rsyslog.d     subuid-        ufw
+
+#17
+
+  GNU nano 8.5                                                                                         New Buffer                                                                                         Modified  
+root@eltex-practice2-pg2-v14:~# tar -czf etc_backup.tar.gz -C /root/etc_backup .
+root@eltex-practice2-pg2-v14:~# apt install bzip2
+root@eltex-practice2-pg2-v14:~# apt install 7zip
+root@eltex-practice2-pg2-v14:~# tar -cjf etc_backup.tar.bz2 -C /root/etc_backup .
+root@eltex-practice2-pg2-v14:~# tar -cf - -C /root/etc_backup . | 7z a -si etc_backup.tar.7z
+
+7-Zip 23.01 (x64) : Copyright (c) 1999-2023 Igor Pavlov : 2023-06-20
+ 64-bit locale=en_US.UTF-8 Threads:2 OPEN_MAX:1024
+
+Creating archive: etc_backup.tar.7z
+
+Add new data to archive: 1 file
+
+
+Files read from disk: 1
+Archive size: 464987 bytes (455 KiB)
+Everything is Ok
+root@eltex-practice2-pg2-v14:~# ls
+archives  etc_backup  etc_backup.tar.7z  etc_backup.tar.bz2  etc_backup.tar.gz
+root@eltex-practice2-pg2-v14:~/archives# ls -lh etc_backup.tar.*
+-rw-r--r-- 1 root root 455K Oct 22 10:30 etc_backup.tar.7z
+-rw-r--r-- 1 root root 527K Oct 22 10:29 etc_backup.tar.bz2
+-rw-r--r-- 1 root root 563K Oct 22 10:28 etc_backup.tar.gz
+root@eltex-practice2-pg2-v14:~/archives# du -b etc_backup.tar.* | sort -n
+464987  etc_backup.tar.7z
+538683  etc_backup.tar.bz2
+575910  etc_backup.tar.gz
+root@eltex-practice2-pg2-v14:~/archives# du -sb /root/etc_backup
+2331407 /root/etc_backup
+#the most efficient method is 7zip archivation (on given data!)
+
+#18
+
+root@eltex-practice2-pg2-v14:~/archives# echo $(date) >> /etc/motd
+root@eltex-practice2-pg2-v14:~/archives# cat /etc/motd
+Hello, Vulf Artur!
+Thu Oct 22 10:36:30 AM UTC 2026
+root@eltex-practice2-pg2-v14:~# rsync rsync -a /etc/ /root/etc_backup/  
+root@eltex-practice2-pg2-v14:~# rsync -a /etc/ /root/etc_backup/
+root@eltex-practice2-pg2-v14:~# cat /root/etc_backup/motd
+Hello, Vulf Artur!
+Thu Oct 22 10:36:30 AM UTC 2026
+root@eltex-practice2-pg2-v14:~# cd /root
+root@eltex-practice2-pg2-v14:~# cd archives/
+root@eltex-practice2-pg2-v14:~/archives# gunzip etc_backup.tar.gz
+root@eltex-practice2-pg2-v14:~/archives# ls
+etc_backup.tar  etc_backup.tar.7z  etc_backup.tar.bz2
+root@eltex-practice2-pg2-v14:~/archives# tar -rvf etc_backup.tar -C /root/etc_backup motd
+motd
+root@eltex-practice2-pg2-v14:~/archives# gzip etc_backup.tar
+root@eltex-practice2-pg2-v14:~/archives# tar -xzOf etc_backup.tar.gz motd
+Hello, Vulf Artur!
+Thu Oct 22 10:36:30 AM UTC 2026
+
+#19
+
+root@eltex-practice2-pg2-v14:~/archives# tar -djf etc_backup.tar.bz2 -C /root/etc_backup
+./motd: Mod time differs
+./motd: Size differs
+
+#20
+
+root@eltex-practice2-pg2-v14:~/archives# mkdir /root/etc_backup_gzip
+root@eltex-practice2-pg2-v14:~/archives# tar -xzf etc_backup.tar.gz -C /root/etc_backup_gzip
+root@eltex-practice2-pg2-v14:~/archives# mkdir /root/etc_backup_7zip
+root@eltex-practice2-pg2-v14:~/archives# 7z x -so etc_backup.tar.7z | tar -xf - -C /root/etc_backup_7zip
+root@eltex-practice2-pg2-v14:~/archives# ls
+etc_backup.tar.7z  etc_backup.tar.bz2  etc_backup.tar.gz
+root@eltex-practice2-pg2-v14:~/archives# cd ..
+root@eltex-practice2-pg2-v14:~# ls
+archives  etc_backup  etc_backup_7zip  etc_backup_gzip
+root@eltex-practice2-pg2-v14:~# diff /root/etc_backup_gzip/motd /root/etc_backup_7zip/motd
+2d1
+< Thu Oct 22 10:36:30 AM UTC 2026
+
+#part 1 done!

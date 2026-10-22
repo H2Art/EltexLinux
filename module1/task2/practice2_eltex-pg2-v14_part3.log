@@ -1,0 +1,174 @@
+#2
+
+root@eltex-practice2-pg2-v14:/# git config --global user.name "H2Art"
+root@eltex-practice2-pg2-v14:/# git config --global user.email "artur.vulf.05@mail.ru"
+root@eltex-practice2-pg2-v14:/# git config --global init.defaultBranch main
+
+#3
+root@eltex-practice2-pg2-v14:/# apt install git gh
+Reading package lists... Done   
+Building dependency tree... Done
+Reading state information... Done
+git is already the newest version (1:2.43.0-1ubuntu7.4).
+The following NEW packages will be installed:
+  gh
+0 upgraded, 1 newly installed, 0 to remove and 94 not upgraded.
+Need to get 8,836 kB of archives.
+After this operation, 45.4 MB of additional disk space will be used.
+Do you want to continue? [Y/n] Y
+Get:1 http://ru.archive.ubuntu.com/ubuntu noble-updates/universe amd64 gh amd64 2.45.0-1ubuntu0.3 [8,836 kB]
+Fetched 8,836 kB in 3s (3,323 kB/s)
+Selecting previously unselected package gh.
+(Reading database ... 125711 files and directories currently installed.)
+Preparing to unpack .../gh_2.45.0-1ubuntu0.3_amd64.deb ...
+Unpacking gh (2.45.0-1ubuntu0.3) ...
+Setting up gh (2.45.0-1ubuntu0.3) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Running kernel seems to be up-to-date.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+User sessions running outdated binaries:
+ root @ user manager service: systemd[2983]
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+root@eltex-practice2-pg2-v14:/# apt update
+Hit:1 http://ru.archive.ubuntu.com/ubuntu noble InRelease
+Get:2 http://ru.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+Get:3 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]            
+Get:4 http://ru.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+Get:5 http://ru.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1,400 kB]
+Get:6 http://ru.archive.ubuntu.com/ubuntu noble-updates/main amd64 Components [181 kB]
+Get:7 http://ru.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1,706 kB]
+Get:8 http://ru.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Components [388 kB]
+Get:9 http://ru.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Components [940 B]       
+Get:10 http://ru.archive.ubuntu.com/ubuntu noble-backports/main amd64 Components [5,764 B]  
+Get:11 http://ru.archive.ubuntu.com/ubuntu noble-backports/universe amd64 Components [12.6 kB]
+Get:12 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [1,146 kB]              
+Get:13 http://security.ubuntu.com/ubuntu noble-security/main amd64 Components [46.4 kB]
+Get:14 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Components [76.2 kB]
+Fetched 5,342 kB in 1s (4,000 kB/s)                                          
+Reading package lists... Done   
+Building dependency tree... Done
+Reading state information... Done
+94 packages can be upgraded. Run 'apt list --upgradable' to see them.
+
+#4
+
+root@eltex-practice2-pg2-v14:/# ssh-keygen -t ed25519 -f ~/.ssh/H2Art
+Generating public/private ed25519 key pair.
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in /root/.ssh/H2Art
+Your public key has been saved in /root/.ssh/H2Art.pub
+The key fingerprint is:
+SHA256:vC/fGlqcF5QrxhKdtoKVJbrkl5xcyUptkATNX8otQc8 root@eltex-practice2-pg2-v14
+The key's randomart image is:
++--[ED25519 256]--+
+|      .=+oo      |
+|       .+O.=..   |
+|      o =oX=E    |
+|     o O X=o..   |
+|      + S =.o    |
+|       . * o .   |
+|        . = .    |
+|        .+ +     |
+|        .o+..    |
++----[SHA256]-----+
+
+#5
+
+root@eltex-practice2-pg2-v14:/# gh auth login
+? What account do you want to log into? GitHub.com
+? What is your preferred protocol for Git operations on this host? SSH
+? Upload your SSH public key to your GitHub account? /root/.ssh/H2Art.pub
+? Title for your SSH key: eltex-practice2-pg2-v14
+? How would you like to authenticate GitHub CLI? Login with a web browser
+
+! First copy your one-time code: 8E64-D6FF
+Press Enter to open github.com in your browser... 
+! Failed opening a web browser at https://github.com/login/device
+  exec: "xdg-open,x-www-browser,www-browser,wslview": executable file not found in $PATH
+  Please try entering the URL in your browser manually
+✓ Authentication complete.
+- gh config set -h github.com git_protocol ssh
+✓ Configured git protocol
+! Authentication credentials saved in plain text
+✓ Uploaded the SSH key to your GitHub account: /root/.ssh/H2Art.pub
+✓ Logged in as H2Art
+
+#6
+
+root@eltex-practice2-pg2-v14:/# gh auth setup-git --hostname github.com
+
+#7
+
+root@eltex-practice2-pg2-v14:/# gh auth status
+github.com
+  ✓ Logged in to github.com account H2Art (/root/.config/gh/hosts.yml)
+  - Active account: true
+  - Git operations protocol: ssh
+  - Token: gho_************************************
+  - Token scopes: 'admin:public_key', 'gist', 'read:org', 'repo'
+
+#8
+
+root@eltex-practice2-pg2-v14:/# gh repo create --public Eltex
+GraphQL: Name already exists on this account (createRepository)
+root@eltex-practice2-pg2-v14:/# gh repo create --public EltexLinux
+✓ Created repository H2Art/EltexLinux on GitHub
+  https://github.com/H2Art/EltexLinux
+
+#9
+
+root@eltex-practice2-pg2-v14:/# mkdir ~/EltexLinux && cd ~/EltexLinux
+root@eltex-practice2-pg2-v14:~/EltexLinux# echo "#Repo for Eltex tasks." >> README.md
+root@eltex-practice2-pg2-v14:~/EltexLinux# git init
+Initialized empty Git repository in /root/EltexLinux/.git/
+root@eltex-practice2-pg2-v14:~/EltexLinux# git add README.md 
+root@eltex-practice2-pg2-v14:~/EltexLinux# git commit -m "first commit"
+[main (root-commit) 5077c7a] first commit
+ 1 file changed, 1 insertion(+)
+ create mode 100644 README.md
+root@eltex-practice2-pg2-v14:~/EltexLinux# git branch -M main
+root@eltex-practice2-pg2-v14:~/EltexLinux# git remote add origin https://github.com/H2Art_github/EltexLinux.git
+root@eltex-practice2-pg2-v14:~/EltexLinux# git status
+On branch main
+nothing to commit, working tree clean
+root@eltex-practice2-pg2-v14:~/EltexLinux# git push -u origin main
+remote: Repository not found.
+fatal: repository 'https://github.com/H2Art_github/EltexLinux.git/' not found
+root@eltex-practice2-pg2-v14:~/EltexLinux# git remote add origin https://github.com/H2Art/EltexLinux.git
+error: remote origin already exists.
+root@eltex-practice2-pg2-v14:~/EltexLinux# git remote add origin https://github.com/H2Art/EltexLinux.git
+error: remote origin already exists.
+root@eltex-practice2-pg2-v14:~/EltexLinux# git remote set-url origin https://github.com/H2Art/EltexLinux.git
+root@eltex-practice2-pg2-v14:~/EltexLinux# git remote -v
+origin  https://github.com/H2Art/EltexLinux.git (fetch)
+origin  https://github.com/H2Art/EltexLinux.git (push)
+root@eltex-practice2-pg2-v14:~/EltexLinux# git push -u origin main
+Enumerating objects: 3, done.
+Counting objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 231 bytes | 231.00 KiB/s, done.
+Total 3 (delta 0), reused 0 (delta 0), pack-reused 0
+To https://github.com/H2Art/EltexLinux.git
+ * [new branch]      main -> main
+branch 'main' set up to track 'origin/main'.
+root@eltex-practice2-pg2-v14:~/EltexLinux# mkdir -p module1/task1
+root@eltex-practice2-pg2-v14:~/EltexLinux# mkdir module1/task2
+root@eltex-practice2-pg2-v14:~/EltexLinux# mkdir module1/task3
+
+
+#10
+
