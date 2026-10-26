@@ -102,6 +102,25 @@ int deleteContactAt(ContactList* clist, int index) {
     return 0; 
 }
 
+static int clearItems(Contact *c, ItemType type) {
+    switch (type) {
+    case ITEM_PHONE:
+        c->phoneCount = 0;
+        memset(c->phones, 0, sizeof c->phones);
+        return 0;
+    case ITEM_EMAIL:
+        c->emailCount = 0;
+        memset(c->emails, 0, sizeof c->emails);
+        return 0;
+    case ITEM_LINK:
+        c->linkCount = 0;
+        memset(c->links, 0, sizeof c->links);
+        return 0;
+    default:
+        return -1; //unknown ItemType
+    }
+}
+
 int editContact(Contact* c, ItemType type, ...) {
     if (!c) { return -1; }
 
@@ -110,38 +129,44 @@ int editContact(Contact* c, ItemType type, ...) {
     va_start(args, type); //moving pointer 
     switch (type)
     {
-    case ITEM_NAME:
+    case ITEM_NAME: {
         char *f = va_arg(args, char*);
         char *m = va_arg(args, char*);
         char *l = va_arg(args, char*);
 
         result = initFullName(c, f, m, l);
-
-        return result;
-    case ITEM_WORKINFO:
+        break;
+    }
+    case ITEM_WORKINFO: {
         char *p = va_arg(args, char*);
         char *comp = va_arg(args, char*);
         
         result = initWorkInformation(c, p, comp);
-        
-        return result;
+        break;
+    }
     case ITEM_PHONE:
     case ITEM_LINK:
-    case ITEM_EMAIL:
+    case ITEM_EMAIL: {
         int n = va_arg(args, int);
-        result = 0;
-        if (n <= 0) { return -1; } //wrong argument
+        if (n <= 0 || n > MAX_ITEMS) { result = -3; break; } //wrong argument
+
+        Contact tmp = *c; //creating a temporary copy of the contact to avoid partial writing
+
+        clearItems(&tmp, type); //clearing all previous items of this type
         while (n > 0) {
             char *field = va_arg(args, char*);
-            result = addItems(1, c, type, field);
-            if (result != 0) { return result; } //runtime error, partially written
+            result = addItems(1, &tmp, type, field);
+            if (result != 0) { break; }
             n--;
         }
-        return result;
+        if (result == 0) {
+            *c = tmp; //updating the original contact with the modified temporary copy
+        }
+        break;
+    }
     default:
-        va_end(args);
-        return -2; //unknown ItemType
+        result = -2; //unknown ItemType
     }
     va_end(args);
-    return 0;
+    return result;
 }
