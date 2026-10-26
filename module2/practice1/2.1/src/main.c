@@ -12,7 +12,11 @@ int main() {
     printf("I'm up to date!\n");
     editContact(c1ptr, ITEM_NAME, "Artur", "Andreevich", "Vulf");
     printf("firstname: %s   middlename: %s    lastname: %s\n", c1ptr->name.firstName, c1ptr->name.middleName, c1ptr->name.lastName);
-
+    editContact(c1ptr, ITEM_PHONE, 2, "+79538668661", "+79137470089");
+    for (int i = 0; i < c1ptr->phoneCount; i++) {
+        printf("phone %d: %s\n", i + 1, c1ptr->phones[i]);
+    }
+    printf("log");
 
 
 
