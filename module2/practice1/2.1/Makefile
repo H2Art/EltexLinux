@@ -1,8 +1,22 @@
-all: Contacts.o main.o
-	gcc main.o Contacts.o -o Contacts
-Contacts.o: src/Contacts.c
-	gcc -c src/Contacts.c -o Contacts.o
-main.o: src/main.c Contacts.o
-	gcc -c src/main.c -o main.o
+UNITY  = unity
+CFLAGS = -Wall -Wextra -g -fsanitize=address,undefined -I$(UNITY) -Isrc
+BUILD  = build
+
+all: $(BUILD)/phonebook
+
+$(BUILD)/phonebook: src/main.c src/Contacts.c | $(BUILD)
+	gcc $(CFLAGS) $^ -o $@
+
+$(BUILD)/test_contacts: tests/test_contacts.c src/Contacts.c $(UNITY)/unity.c | $(BUILD)
+	gcc $(CFLAGS) $^ -o $@
+
+test: $(BUILD)/test_contacts
+	./$(BUILD)/test_contacts
+
+$(BUILD):
+	mkdir -p $(BUILD)
+
 clean:
-	rm -rf *.o Contacts
+	rm -rf $(BUILD)
+
+.PHONY: all test clean

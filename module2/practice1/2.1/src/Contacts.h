@@ -61,6 +61,7 @@ int initWorkInformation(Contact*, const char[MAX_LENGTH], const char[MAX_LENGTH]
 
 //endpoints (ContactList actions)
 int deleteContactAt(ContactList*, int);
+static int clearItems(Contact*, ItemType);
 int editContact    (Contact*, ItemType, ...);
 int addContact     (ContactList*, const Contact*);
 
