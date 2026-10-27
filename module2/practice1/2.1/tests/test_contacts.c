@@ -85,6 +85,14 @@ static void assertListNames(int n, const int *ids) {
     }
 }
 
+static int editList(Contact *c, ItemType ty, int n, const char **items) {
+    char buf[MAX_ITEMS][MAX_LENGTH];
+    for (int i = 0; i < n; i++) {
+        snprintf(buf[i], MAX_LENGTH, "%s", items[i] ? items[i] : "");
+    }
+    return editContact(c, ty, n, buf);
+}
+
 /* =====================================================
  *                    initFullName
  * ===================================================== */
@@ -706,7 +714,8 @@ void test_edit_list_replacesAll_allTypes(void) {
         ItemType ty = LIST_TYPES[k];
         memset(&c, 0, sizeof c);
         addItems(3, &c, ty, "1", "2", "3");
-        TEST_ASSERT_EQUAL_INT(0, editContact(&c, ty, 2, "10", "20"));
+        const char *items[] = { "10", "20" };
+        TEST_ASSERT_EQUAL_INT(0, editList(&c, ty, 2, items));
         TEST_ASSERT_EQUAL_INT(2, *countOf(&c, ty));
         TEST_ASSERT_EQUAL_STRING("10", itemAt(&c, ty, 0));
         TEST_ASSERT_EQUAL_STRING("20", itemAt(&c, ty, 1));
@@ -715,21 +724,23 @@ void test_edit_list_replacesAll_allTypes(void) {
 }
 
 void test_edit_list_fromEmpty(void) {
-    TEST_ASSERT_EQUAL_INT(0, editContact(&c, ITEM_PHONE, 1, "555"));
+    const char *items[] = { "555" };
+    TEST_ASSERT_EQUAL_INT(0, editList(&c, ITEM_PHONE, 1, items));
     TEST_ASSERT_EQUAL_INT(1, c.phoneCount);
     TEST_ASSERT_EQUAL_STRING("555", c.phones[0]);
 }
 
 void test_edit_list_toMaxItems(void) {
-    TEST_ASSERT_EQUAL_INT(0, editContact(&c, ITEM_EMAIL, 10,
-        "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"));
+    const char *items[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
+    TEST_ASSERT_EQUAL_INT(0, editList(&c, ITEM_EMAIL, 10, items));
     TEST_ASSERT_EQUAL_INT(MAX_ITEMS, c.emailCount);
     TEST_ASSERT_EQUAL_STRING("10", c.emails[9]);
 }
 
 void test_edit_list_fullToOne(void) {
     addItems(10, &c, ITEM_PHONE, "1", "2", "3", "4", "5", "6", "7", "8", "9", "10");
-    TEST_ASSERT_EQUAL_INT(0, editContact(&c, ITEM_PHONE, 1, "x"));
+    const char *items[] = { "x" };
+    TEST_ASSERT_EQUAL_INT(0, editList(&c, ITEM_PHONE, 1, items));
     TEST_ASSERT_EQUAL_INT(1, c.phoneCount);
     for (int i = 1; i < MAX_ITEMS; i++)
         TEST_ASSERT_EQUAL_STRING("", c.phones[i]);
@@ -738,7 +749,8 @@ void test_edit_list_fullToOne(void) {
 void test_edit_list_doesNotTouchOtherLists(void) {
     addItems(1, &c, ITEM_PHONE, "111");
     addItems(1, &c, ITEM_LINK, "t.me/x");
-    TEST_ASSERT_EQUAL_INT(0, editContact(&c, ITEM_EMAIL, 1, "a@b.ru"));
+    const char *items[] = { "a@b.ru" };
+    TEST_ASSERT_EQUAL_INT(0, editList(&c, ITEM_EMAIL, 1, items));
     TEST_ASSERT_EQUAL_INT(1, c.phoneCount);
     TEST_ASSERT_EQUAL_STRING("111", c.phones[0]);
     TEST_ASSERT_EQUAL_INT(1, c.linkCount);
@@ -748,17 +760,19 @@ void test_edit_list_doesNotTouchOtherLists(void) {
 void test_edit_list_doesNotTouchNameAndWork(void) {
     initFullName(&c, "Ivan", NULL, "Petrov");
     initWorkInformation(&c, "Dev", "Eltex");
-    editContact(&c, ITEM_PHONE, 1, "1");
+    const char *items[] = { "1" };
+    editList(&c, ITEM_PHONE, 1, items);
     TEST_ASSERT_EQUAL_STRING("Ivan", c.name.firstName);
     TEST_ASSERT_EQUAL_STRING("Eltex", c.workInfo.company);
 }
 
 void test_edit_list_badCount_keepsOld(void) {
     addItems(3, &c, ITEM_PHONE, "1", "2", "3");
-    TEST_ASSERT_EQUAL_INT(-3, editContact(&c, ITEM_PHONE, 0));
-    TEST_ASSERT_EQUAL_INT(-3, editContact(&c, ITEM_PHONE, -1));
-    TEST_ASSERT_EQUAL_INT(-3, editContact(&c, ITEM_PHONE, MAX_ITEMS + 1));
-    TEST_ASSERT_EQUAL_INT(-3, editContact(&c, ITEM_PHONE, INT_MAX));
+    char buf[MAX_ITEMS][MAX_LENGTH] = {{0}};
+    TEST_ASSERT_EQUAL_INT(CONTACT_ERR_BAD_COUNT, editContact(&c, ITEM_PHONE, 0, buf));
+    TEST_ASSERT_EQUAL_INT(CONTACT_ERR_BAD_COUNT, editContact(&c, ITEM_PHONE, -1, buf));
+    TEST_ASSERT_EQUAL_INT(CONTACT_ERR_BAD_COUNT, editContact(&c, ITEM_PHONE, MAX_ITEMS + 1, buf));
+    TEST_ASSERT_EQUAL_INT(CONTACT_ERR_BAD_COUNT, editContact(&c, ITEM_PHONE, INT_MAX, buf));
     TEST_ASSERT_EQUAL_INT(3, c.phoneCount);
     TEST_ASSERT_EQUAL_STRING("1", c.phones[0]);
     TEST_ASSERT_EQUAL_STRING("3", c.phones[2]);
@@ -767,14 +781,17 @@ void test_edit_list_badCount_keepsOld(void) {
 void test_edit_list_truncatesLongString(void) {
     char longStr[2 * MAX_LENGTH + 1];
     makeStr(longStr, 2 * MAX_LENGTH, 'z');
-    TEST_ASSERT_EQUAL_INT(0, editContact(&c, ITEM_LINK, 2, longStr, "next"));
+    const char *items[] = { longStr, "next" };
+    TEST_ASSERT_EQUAL_INT(0, editList(&c, ITEM_LINK, 2, items));
     TEST_ASSERT_EQUAL_UINT(MAX_LENGTH - 1, strlen(c.links[0]));
     TEST_ASSERT_EQUAL_STRING("next", c.links[1]);
 }
 
 void test_edit_list_twiceInRow(void) {
-    editContact(&c, ITEM_PHONE, 3, "1", "2", "3");
-    editContact(&c, ITEM_PHONE, 1, "9");
+    const char *first[]  = { "1", "2", "3" };
+    const char *second[] = { "9" };
+    editList(&c, ITEM_PHONE, 3, first);
+    editList(&c, ITEM_PHONE, 1, second);
     TEST_ASSERT_EQUAL_INT(1, c.phoneCount);
     TEST_ASSERT_EQUAL_STRING("9", c.phones[0]);
     TEST_ASSERT_EQUAL_STRING("", c.phones[1]);
@@ -790,13 +807,15 @@ void test_edit_contactInsideList_persists(void) {
 }
 
 void test_edit_list_nullEntry_noCrash_noNullText(void) {
-    editContact(&c, ITEM_PHONE, 2, "1", NULL);
+    const char *items[] = { "1", NULL };
+    editList(&c, ITEM_PHONE, 2, items);
     assertNoNullText(&c, ITEM_PHONE);
 }
 
 void test_edit_list_nullEntry_keepsOldOrValid(void) {
     addItems(2, &c, ITEM_EMAIL, "old1@x.ru", "old2@x.ru");
-    editContact(&c, ITEM_EMAIL, 2, "new@x.ru", NULL);
+    const char *items[] = { "new@x.ru", NULL };
+    editList(&c, ITEM_EMAIL, 2, items);
     assertNoNullText(&c, ITEM_EMAIL);
 }
 
@@ -814,7 +833,8 @@ void test_scenario_fullContactLifecycle(void) {
     TEST_ASSERT_EQUAL_INT(0, addContact(&list, &a));
 
     Contact *p = &list.contacts[0];
-    TEST_ASSERT_EQUAL_INT(0, editContact(p, ITEM_PHONE, 1, "999"));
+    const char *phones[] = { "999" };
+    TEST_ASSERT_EQUAL_INT(0, editList(p, ITEM_PHONE, 1, phones));
     TEST_ASSERT_EQUAL_INT(0, editContact(p, ITEM_NAME, "Oleg", NULL, "Sidorov"));
     TEST_ASSERT_EQUAL_INT(1, p->phoneCount);
     TEST_ASSERT_EQUAL_STRING("999", p->phones[0]);
