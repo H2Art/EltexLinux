@@ -4,10 +4,31 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-int printOptions();
-int fullNameInvite();
-int printName(Contact*);
-int main();
+typedef struct AppState {
+    Contact     currentContact;
+    ContactList contactList;
+    int         currentIndex;
+    int         running;
+} AppState;
+
+int printMainOptions(void);
+int printEditOptions(void);
+
+int readChoice(FILE *in);
+
+int processMainChoice(AppState *st, int c, FILE *in);
+int processEditChoice(AppState *st, int c, FILE *in);
+
+int checkContactAtIndex(AppState *st, int i);
+
+int fullNameInvite(AppState *st, FILE *in);
+int workInfoInvite(AppState *st, FILE *in);
+int itemInvite    (AppState *st, ItemType type, FILE *in);
+
+int printContact(const Contact *c);
+
+int main(void);
+
 
 typedef enum UserOptions {
     UO_CREATE_CONTACT = 1,

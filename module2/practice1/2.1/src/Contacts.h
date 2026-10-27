@@ -70,7 +70,7 @@ const char *contactStatusString(ContactStatus s);
 
 //functions
 int checkIfStringEmpty(const char*);
-int clearItems     (Contact*, ItemType);
+int clearItems        (Contact*, ItemType);
 //adds
 int addItems(int, Contact*, ItemType, ...);
 

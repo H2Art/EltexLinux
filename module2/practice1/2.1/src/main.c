@@ -3,12 +3,7 @@
 #include <stdlib.h>
 #include "main.h"
 
-static Contact     CURRENT_CONTACT;
-static ContactList CURRENT_CONTACT_LIST;
-static int         CURRENT_INDEX;
-
 //texts to print
-
 int printMainOptions() { 
     printf("Choose an option:\n");
     printf("1. Create new contact.\n");
@@ -32,24 +27,27 @@ int printEditOptions() {
     return 0;
 }
 
-int readChoice() {
-    char buff[16]; // 1 char + '\0'
-    fgets(buff, sizeof(buff), stdin); //all other input gives 0! Not recommended to associate 0 to any option.
-    int choice = (int)strtol(buff, NULL, 10); //converting to int
-    return choice;
+int readChoice(FILE *in) {
+    char buff[16]; 
+    if (!fgets(buff, sizeof buff, in)) return 0;
+    if (!strchr(buff, '\n')) { 
+        int c; 
+        while ((c = getc(in)) != '\n' && c != EOF) { } 
+    }
+    return (int)strtol(buff, NULL, 10); //converting to int
 }
 
-int processMainChoice(int c) {
+int processMainChoice(AppState *st, int c, FILE *in) {
     int result = 0;
     switch (c)
     {
     case UO_CREATE_CONTACT: {
-        CURRENT_CONTACT = (Contact){0};
-        fullNameInvite();
+        st->currentContact = (Contact){0};
+        fullNameInvite(st, in);
         break;
     }
     case UO_ADD_CURR_CONTACT: {
-        result = addContact(&CURRENT_CONTACT_LIST, &CURRENT_CONTACT);
+        result = addContact(&st->contactList, &st->currentContact);
         if (result) {
             printf("%s\n", contactStatusString(result));
         }
@@ -60,13 +58,41 @@ int processMainChoice(int c) {
     }
     case UO_EDIT_CURR_CONTACT: {
         printEditOptions();
-        int choice = readChoice();
-        result = processEditChoice(choice);
+        int choice = readChoice(in);
+        result = processEditChoice(st, choice, in);
         break;
     }
     case UO_DELETE_CURR_CONTACT: {
-
+        if (checkContactAtIndex(st, st->currentIndex) != CONTACT_OK) {
+            printf("No contact selected.\n");
+            return CONTACT_ERR_BAD_INDEX;
+        }
+        result = deleteContactAt(&st->contactList, st->currentIndex);
         break;
+    }
+    case UO_PRINT_CURR_CONTACT: {
+        if (checkContactAtIndex(st, st->currentIndex) != CONTACT_OK) {
+            printf("No contact selected.\n");
+            return CONTACT_ERR_BAD_INDEX;
+        }
+        printContact(&st->currentContact);
+        break;
+    }
+    case UO_CHOOSE_CONTACT_BY_IND: {
+        printf("Type index of contact to choose (0-%d):\n", st->contactList.count - 1);
+        int index = readChoice(in);
+        if (checkContactAtIndex(st, index) != CONTACT_OK) {
+            printf("Invalid index.\n");
+            return CONTACT_ERR_BAD_INDEX;
+        }
+        st->currentIndex = index;
+        printf("Contact %d selected.\n", st->currentIndex);
+        break;
+    }
+    case UO_EXIT: {
+        printf("Exiting...\n");
+        st->running = 0;
+        return CONTACT_OK;
     }
     default:
         return CONTACT_ERR_BAD_INDEX;
@@ -74,28 +100,36 @@ int processMainChoice(int c) {
     return result;
 }
 
-processEditChoice(int c) {
+int processEditChoice(AppState *st, int c, FILE *in) {
     int result = 0;
+    c--; // Adjusting for 0-based index
     switch (c)
     {
     case ITEM_PHONE: {
-        
+        result = itemInvite(st, ITEM_PHONE, in);
+        break;
     }
     case ITEM_EMAIL: {
-
+        result = itemInvite(st, ITEM_EMAIL, in);
+        break;
     }
     case ITEM_LINK: {
-
+        result = itemInvite(st, ITEM_LINK, in);
+        break;
     }
     case ITEM_NAME: {
         result = -1;
-        while (result != 0) {
-            result = fullNameInvite();
+        while (result != CONTACT_OK) {
+            result = fullNameInvite(st, in);
         }
         break;
     }
     case ITEM_WORKINFO: {
-        result = workInfoInvite();
+        result = workInfoInvite(st, in);
+        break;
+    }
+    case 5: {
+        result = CONTACT_OK;
         break;
     }
     default:
@@ -104,61 +138,68 @@ processEditChoice(int c) {
     return result;
 }
 
-int checkContactAtIndex(int i) {
-    if (i < 0 || i >= MAX_CONTACTS) { return CONTACT_ERR_BAD_INDEX; }
-    if (&CURRENT_CONTACT_LIST.contacts[i] == NULL) {
-        return CONTACT_ERR_NULL_ARG;
-    }
+int checkContactAtIndex(AppState *st, int i) {
+    if (!st) return CONTACT_ERR_NULL_ARG;
+    if (i < 0 || i >= st->contactList.count) return CONTACT_ERR_BAD_INDEX;
     return CONTACT_OK;
 }
 
 
-//invites
-int itemInvite(ItemType type) {
+//invites and user-input parsing
+int itemInvite(AppState *st, ItemType type, FILE *in) {
     printf("How much entries do you want to add?\n");
-    int n = readChoice();
+    int n = readChoice(in);
     if (n <= 0 || n > MAX_ITEMS) {
         return CONTACT_ERR_BAD_COUNT;
     } 
+
     printf("Now type %d items, after each press ENTER.\n", n);
+
+
     char buffer[MAX_ITEMS][MAX_LENGTH];
     for (int i = 0; i < n; i++) {
-        fgets(buffer[i], MAX_LENGTH, stdin);
+        if (!fgets(buffer[i], MAX_LENGTH, in)) return CONTACT_ERR_EMPTY_ITEM;
+        if (!strchr(buffer[i], '\n')) {
+            int ch; while ((ch = getc(in)) != '\n' && ch != EOF) { }
+        }
+        buffer[i][strcspn(buffer[i], "\n")] = '\0'; //removing \n
     }
 
-    editContact(&CURRENT_CONTACT, type, n, n);
-
+    return editContact(&st->currentContact, type, n, buffer);
 }
 
-int fullNameInvite() {
+int fullNameInvite(AppState *st, FILE *in) {
     char fname[50];
     char mname[50];
     char lname[50];
     printf("Please, type first name and last name, middle name is optional.\n");
     printf("First name: ");
-    fgets(fname, MAX_LENGTH, stdin);
+    fgets(fname, MAX_LENGTH, in);
     printf("Middle name: ");
-    fgets(mname, MAX_LENGTH, stdin);
+    fgets(mname, MAX_LENGTH, in);
     printf("Last name: ");
-    fgets(lname, MAX_LENGTH, stdin);
+    fgets(lname, MAX_LENGTH, in);
 
     fname[strcspn(fname, "\n")] = '\0';
     mname[strcspn(mname, "\n")] = '\0'; //deleting extra \n in the end
     lname[strcspn(lname, "\n")] = '\0';
     
-    int result = editContact(&CURRENT_CONTACT, ITEM_NAME, fname, mname, lname);
+    int result = editContact(&st->currentContact, ITEM_NAME, fname, mname, lname);
     return result;
 }
 
-int workInfoInvite() {
+int workInfoInvite(AppState *st, FILE *in) {
     char position[50];
     char company[50];
     printf("Position: ");
-    fgets(position, MAX_LENGTH, stdin);
+    if (!fgets(position, MAX_LENGTH, in)) return CONTACT_ERR_NULL_ARG;
     printf("Company: ");
-    fgets(company, MAX_LENGTH, stdin);
+    if (!fgets(company, MAX_LENGTH, in)) return CONTACT_ERR_NULL_ARG;
 
-    int result = editContact(&CURRENT_CONTACT, ITEM_WORKINFO, position, company);
+    position[strcspn(position, "\n")] = '\0';
+    company[strcspn(company,  "\n")] = '\0';
+
+    int result = editContact(&st->currentContact, ITEM_WORKINFO, position, company);
     return result;
 }
 
@@ -166,21 +207,33 @@ int workInfoInvite() {
 
 
 
-int printName(Contact *c) {
-    printf("%s\t%s\t%s\n", c->name.firstName, c->name.middleName, c->name.lastName);
+int printContact(const Contact *c) {
+    if (!c) return CONTACT_ERR_NULL_ARG; 
+    
+    printf("Name: %s %s %s\n", c->name.firstName, c->name.middleName, c->name.lastName);
+    printf("Work: %s at %s\n", c->workInfo.position, c->workInfo.company);
+    printf("Phones (%d):\n", c->phoneCount);
+    for (int i = 0; i < c->phoneCount; i++) {
+        printf("  %s\n", c->phones[i]);
+    }
+    for (int i = 0; i < c->emailCount; i++) {
+        printf("  %s\n", c->emails[i]);
+    }
+    for (int i = 0; i < c->linkCount; i++) {
+        printf("  %s\n", c->links[i]);
+    }
+    return CONTACT_OK;
 }
 
-int main() {
-    CURRENT_CONTACT = (Contact){0};
-    CURRENT_CONTACT_LIST = (ContactList){0};
-    CURRENT_INDEX = -1;
-    int running = 0;
-    while (running) {
-        
+#ifndef UNIT_TEST
+int main(void) {
+    AppState st = {0};
+    st.currentIndex = -1;
+    st.running = 1;
+    while (st.running) {
+        printMainOptions();
+        processMainChoice(&st, readChoice(stdin), stdin);
     }
-
-    readChoice();
-
-
     return 0;
 }
+#endif
