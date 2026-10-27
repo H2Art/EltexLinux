@@ -3,12 +3,28 @@
 #include <stdarg.h>
 #include "Contacts.h"
 
+const char *contactStatusString(ContactStatus s) {
+    switch (s) {
+    case CONTACT_OK:                   return "OK";
+    case CONTACT_ERR_NULL_ARG:         return "Null argument";
+    case CONTACT_ERR_EMPTY_FIRST_NAME: return "First name is required";
+    case CONTACT_ERR_EMPTY_LAST_NAME:  return "Last name is required";
+    case CONTACT_ERR_LIST_FULL:        return "Contact list is full";
+    case CONTACT_ERR_BAD_INDEX:        return "Index out of range";
+    case CONTACT_ERR_BAD_COUNT:        return "Wrong number of items";
+    case CONTACT_ERR_LIMIT_EXCEEDED:   return "Too many items";
+    case CONTACT_ERR_UNKNOWN_TYPE:     return "Unknown item type";
+    case CONTACT_ERR_EMPTY_ITEM:       return "Empty item";
+    default:                           return "Unknown error";
+    }
+}
+
 int initFullName(Contact* c , const char* firstName, const char* middleName, const char* lastName) {
     Fullname fn;
 
-    if (c == NULL) { return -1; } //nullptr
-    if (firstName == NULL || firstName[0] == '\0') { return -2; }    //firstname is required
-    if (lastName == NULL || lastName[0] == '\0') { return -3; } //lastname is required
+    if (!c) { return CONTACT_ERR_NULL_ARG; } //nullptr
+    if (checkIfStringEmpty(firstName)) { return CONTACT_ERR_EMPTY_FIRST_NAME; } //firstname is required
+    if (checkIfStringEmpty(lastName)) { return CONTACT_ERR_EMPTY_LAST_NAME; }  //lastname is required
     
 
     snprintf(fn.firstName, sizeof(fn.firstName), "%s", firstName);
@@ -17,10 +33,24 @@ int initFullName(Contact* c , const char* firstName, const char* middleName, con
 
     c->name = fn;
 
-    return 0;
+    return CONTACT_OK;
+}
+
+int checkIfStringEmpty(const char* c) {
+    int i = 0;
+    int isEmpty = 1;
+    if (!c) { return 1; }
+    while (c[i] != '\0') { 
+        isEmpty = ((c[i] == ' ' || c[i] == '\t' || c[i] == '\n') && isEmpty);
+        i++;
+    }
+
+    return isEmpty;
 }
 
 int initWorkInformation(Contact* c, const char* position, const char* company) {
+    if (!c) { return CONTACT_ERR_NULL_ARG; }
+
     WorkInformation wi;
 
     snprintf(wi.position, sizeof(wi.position), "%s", position ? position : "");
@@ -28,10 +58,11 @@ int initWorkInformation(Contact* c, const char* position, const char* company) {
 
     c->workInfo = wi;
 
-    return 0;
+    return CONTACT_OK;
 }
 
 int addItems(int n, Contact* c, ItemType type, ...) {
+    if (!c) { return CONTACT_ERR_NULL_ARG; }
     int *counter; //pointer to count of corresponding field
     char *base;   //pointer to first byte of 2dim array
     size_t width; //size of one entry
@@ -59,18 +90,28 @@ int addItems(int n, Contact* c, ItemType type, ...) {
 
     //checking border cases
 
-    if (n < 1) {
-        return -2;
-    }
-    if (n + *counter > MAX_ITEMS) {
-        return -3;
+    if ((n < 1) || (n + *counter > MAX_ITEMS)) {
+        return CONTACT_ERR_BAD_COUNT;
     }
 
 
     //now we need to iterate through all non-required args and add them
 
-    va_list entries;
+    va_list entries, check;
     va_start(entries, type);  //moving pointer to first arg
+    va_copy(check, entries);
+
+    //at first we check that all args are not empty
+    for (int i = 0; i < n; i++) {
+        if (checkIfStringEmpty(va_arg(check, const char*))) {
+            va_end(check);
+            va_end(entries);
+            return CONTACT_ERR_NULL_ARG; //one or few args were empty/NULL
+        }
+    }
+    va_end(check);
+
+    //if all args were proper, write them in Contact
     for (int i = 0; i < n; i++) {
         const char *entry = va_arg(entries, const char*);
         snprintf(base + (size_t)(*counter) * width, width, "%s", entry);
@@ -79,19 +120,21 @@ int addItems(int n, Contact* c, ItemType type, ...) {
 
     va_end(entries);
 
-    return 0;
+    return CONTACT_OK;
 }
 
 int addContact(ContactList* clist, const Contact* c) {
-    if (!c || !clist) { return -1; } //nullptr exception
-    if (clist->count >= MAX_CONTACTS) { return -2; } //no space in contact list
-    clist->contacts[clist->count++] = *c;
+    if (!c || !clist) { return CONTACT_ERR_NULL_ARG; } //nullptr exception
+    if (clist->count >= MAX_CONTACTS) { return CONTACT_ERR_LIST_FULL; } //no space in contact list
+    if (checkIfStringEmpty(c->name.firstName)) { return CONTACT_ERR_EMPTY_FIRST_NAME; }
+    if (checkIfStringEmpty(c->name.lastName)) { return CONTACT_ERR_EMPTY_LAST_NAME; }
 
-    return 0;
+    clist->contacts[clist->count++] = *c;
+    return CONTACT_OK;
 }
 
 int deleteContactAt(ContactList* clist, int index) {
-    if (!clist) { return -1; } //nullptr exception
+    if (!clist) { return CONTACT_ERR_NULL_ARG; } //nullptr exception
     if (index >= clist->count || index < 0) { return -2; } //out of bounds
 
     for (int i = index; i < clist->count - 1; i++) {
@@ -99,30 +142,34 @@ int deleteContactAt(ContactList* clist, int index) {
     }
     clist->contacts[clist->count - 1] = (Contact){0}; //deleting clone
     clist->count--;
-    return 0; 
+    return CONTACT_OK; 
 }
 
-static int clearItems(Contact *c, ItemType type) {
+int clearItems(Contact *c, ItemType type) {
     switch (type) {
     case ITEM_PHONE:
         c->phoneCount = 0;
         memset(c->phones, 0, sizeof c->phones);
-        return 0;
+        return CONTACT_OK;
     case ITEM_EMAIL:
         c->emailCount = 0;
         memset(c->emails, 0, sizeof c->emails);
-        return 0;
+        return CONTACT_OK;
     case ITEM_LINK:
         c->linkCount = 0;
         memset(c->links, 0, sizeof c->links);
-        return 0;
+        return CONTACT_OK;
     default:
-        return -1; //unknown ItemType
+        return CONTACT_ERR_UNKNOWN_TYPE; //unknown ItemType
     }
 }
+int editContactWithBuffer() {
+
+}
+
 
 int editContact(Contact* c, ItemType type, ...) {
-    if (!c) { return -1; }
+    if (!c) { return CONTACT_ERR_NULL_ARG; }
 
     int result = 0;
     va_list args;
@@ -148,21 +195,29 @@ int editContact(Contact* c, ItemType type, ...) {
     case ITEM_LINK:
     case ITEM_EMAIL: {
         int n = va_arg(args, int);
-        if (n <= 0 || n > MAX_ITEMS) { result = -3; break; } //wrong argument
+        char (*data)[MAX_LENGTH] = va_arg(args, char (*)[MAX_LENGTH]);
 
+        if (n <= 0 || n > MAX_ITEMS) { result = CONTACT_ERR_BAD_COUNT; break; } //wrong argument
+        if (!data) { result = CONTACT_ERR_NULL_ARG; break; } //nullptr
+        for (int i = 0; i < n; i++) {
+            if (checkIfStringEmpty(data[i])) { result = CONTACT_ERR_EMPTY_ITEM; break; } //empty string
+        }
+        if (result != CONTACT_OK) { break; } //if any of the checks failed, exit
         Contact tmp = *c; //creating a temporary copy of the contact to avoid partial writing
 
         clearItems(&tmp, type); //clearing all previous items of this type
-        while (n > 0) {
-            char *field = va_arg(args, char*);
-            result = addItems(1, &tmp, type, field);
-            if (result != 0) { break; }
-            n--;
+        for (int i = 0; i < n; i++) {
+            result = addItems(1, &tmp, type, data[i]);
+            if (result != CONTACT_OK) { break; }
         }
-        if (result == 0) {
+        if (result == CONTACT_OK) {
             *c = tmp; //updating the original contact with the modified temporary copy
         }
         break;
+
+
+
+
     }
     default:
         result = -2; //unknown ItemType
