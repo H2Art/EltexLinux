@@ -209,9 +209,6 @@ int workInfoInvite(AppState *st, FILE *in) {
 }
 
 
-
-
-
 int printContact(const Contact *c) {
     if (!c) return CONTACT_ERR_NULL_ARG; 
     
