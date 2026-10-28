@@ -86,6 +86,7 @@ int processMainChoice(AppState *st, int c, FILE *in) {
             return CONTACT_ERR_BAD_INDEX;
         }
         st->currentIndex = index;
+        st->currentContact = st->contactList.contacts[st->currentIndex];
         printf("Contact %d selected.\n", st->currentIndex);
         break;
     }

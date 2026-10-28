@@ -1,0 +1,37 @@
+#!/usr/bin/expect -f
+set timeout 5
+spawn ./build/phonebook
+
+expect "Choose an option:"
+send "1\r"
+
+expect "First name:"
+send "Ivan\r"
+expect "Middle name:"
+send "\r"
+expect "Last name:"
+send "Petrov\r"
+
+expect "Choose an option:"
+send "3\r"
+expect "What field"
+send "1\r"          ;# phones
+expect "How much entries"
+send "2\r"
+expect "Now type 2 items"
+send "123456789\r"
+send "987654321\r"
+
+expect "Choose an option:"
+send "2\r"          ;# add to list
+expect "Contact succesfully added!"
+
+expect "Choose an option:"
+send "5\r"          ;# print
+expect "Phones (2):"
+
+expect "Choose an option:"
+send "9\r"          ;# exit
+expect "Exiting..."
+
+expect eof
