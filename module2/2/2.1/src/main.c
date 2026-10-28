@@ -79,6 +79,10 @@ int processMainChoice(AppState *st, int c, FILE *in) {
         break;
     }
     case UO_CHOOSE_CONTACT_BY_IND: {
+        if (st->contactList.count == 0) {
+            printf("Contact list is empty.\n");
+            return CONTACT_ERR_BAD_INDEX;
+        }
         printf("Type index of contact to choose (0-%d):\n", st->contactList.count - 1);
         int index = readChoice(in);
         if (checkContactAtIndex(st, index) != CONTACT_OK) {
@@ -217,9 +221,11 @@ int printContact(const Contact *c) {
     for (int i = 0; i < c->phoneCount; i++) {
         printf("  %s\n", c->phones[i]);
     }
+    printf("Emails (%d):\n", c->emailCount);
     for (int i = 0; i < c->emailCount; i++) {
         printf("  %s\n", c->emails[i]);
     }
+    printf("Links (%d):\n", c->linkCount);
     for (int i = 0; i < c->linkCount; i++) {
         printf("  %s\n", c->links[i]);
     }

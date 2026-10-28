@@ -163,9 +163,6 @@ int clearItems(Contact *c, ItemType type) {
         return CONTACT_ERR_UNKNOWN_TYPE; //unknown ItemType
     }
 }
-int editContactWithBuffer() {
-
-}
 
 
 int editContact(Contact* c, ItemType type, ...) {
@@ -214,10 +211,6 @@ int editContact(Contact* c, ItemType type, ...) {
             *c = tmp; //updating the original contact with the modified temporary copy
         }
         break;
-
-
-
-
     }
     default:
         result = -2; //unknown ItemType
