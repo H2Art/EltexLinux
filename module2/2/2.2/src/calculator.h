@@ -28,11 +28,13 @@ typedef enum CalculationMode {
     MULTIPLICATION_DIVISION
 } CalculationMode;
 
+//math functions
 double add(double a, double b);
 double subtract(double a, double b);
 double multiply(double a, double b);
 double divide(double a, double b);
 
+//interface function to solve an operation
 double solve(double left, double right, Operation operation);
 
 //functions to work with char*
@@ -40,11 +42,13 @@ int removeSpaces(char* str);
 int isValidExpression(const char* expression);
 int isDigit(char c);
 int isOperator(char c);
+
 //functions to work with CalculatorDoubleLinkedList
-int tokenize(char* expression, CalculatorDoubleLinkedList list);
+int tokenize(char* expression, CalculatorDoubleLinkedList *list);
 int takeOneNumber(char **expression, double *number);
 int takeOneOperation(char **expression, Operation *operation);
-int calculateExpression(CalculatorDoubleLinkedList list, CalculationMode mode, double *result);
-
+int calculateExpression(CalculatorDoubleLinkedList *list, CalculationMode mode, double *result);
+void freeList(CalculatorDoubleLinkedList *list);
+static void removeNode(CalculatorDoubleLinkedList *list, CalculatorNode *n);
 
 #endif

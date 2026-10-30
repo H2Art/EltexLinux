@@ -1,15 +1,7 @@
 #include <stdio.h>
 #include "calculator.h"
 #include <string.h>
-
-int debug() {
-    char expression[] = "3 + 5 * 2 - 8 / 4";
-    removeSpaces(expression);
-    printf("%s\n", isValidExpression(expression) ? "Valid expression" : "Invalid expression");
-
-
-    return 0;
-}
+#include <stdlib.h>
 int main() {
     printf("Calculator program started.\n");
     char input[256];
@@ -24,16 +16,22 @@ int main() {
             break;
         }
         removeSpaces(input);
-        if (!isValidExpression(input)) {
-            printf("Invalid expression. Please try again.\n");
+        if (!isValidExpression(input) || !tokenize(input, &list)) {
+            printf("Invalid expression.\n");
+            freeList(&list);
             continue;
         }
-        tokenize(input, list);
         double result = 0;
-        calculateExpression(list, MULTIPLICATION_DIVISION, &result);
-        calculateExpression(list, ADDITION_SUBTRACTION, &result);
-        printf("Result: %lf\n", result);
+        if (list.size == 0) {
+            result = strtod(input, NULL);
+        } else if (!calculateExpression(&list, MULTIPLICATION_DIVISION, &result) ||
+                !calculateExpression(&list, ADDITION_SUBTRACTION, &result)) {
+            printf("Error (division by zero).\n");
+            freeList(&list);
+            continue;
+        }
+        printf("Result: %g\n", result);
+        freeList(&list);
     }
-    debug();
     return 0;
 }

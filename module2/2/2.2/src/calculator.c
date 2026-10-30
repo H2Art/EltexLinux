@@ -69,48 +69,37 @@ int isDigit(char c) {
     return (c >= '0' && c <= '9');
 }
 
-int tokenize(char *expression, CalculatorDoubleLinkedList list) {
-    double leftNumber = 0;
-    double rightNumber = 0;
-    Operation operation = 0;
+int tokenize(char *expr, CalculatorDoubleLinkedList *list) {
+    double left, right;
+    Operation op;
 
-    while (*expression != '\0') {
-        if (!takeOneNumber(&expression, &leftNumber)) {
-            return 0; // Failed to parse a number
-        }
-        if (!takeOneOperation(&expression, &operation)) {
-            return 0; // Failed to parse an operation
-        }
-        if (!takeOneNumber(&expression, &rightNumber)) {
-            return 0; // Failed to parse a number
-        }
-        //taken one number, one operation, and one number, now we can create a node and add it to the list
+    if (!takeOneNumber(&expr, &left)) return 0;
 
-        CalculatorNode* newNode = (CalculatorNode*)malloc(sizeof(CalculatorNode));
-        if (newNode == NULL) {
-            return 0; // Memory allocation failed 
-        }
+    while (*expr != '\0') {
+        if (!takeOneOperation(&expr, &op)) goto fail;
+        if (!takeOneNumber(&expr, &right)) goto fail;
 
-        newNode->left = leftNumber;
-        newNode->right = rightNumber;
-        newNode->operation = operation;
+        CalculatorNode *node = malloc(sizeof *node);
+        if (!node) goto fail;
 
-        if (list.size == 0) {
-            newNode->next = NULL;
-            newNode->prev = NULL;
-            list.head = newNode;
-            list.tail = newNode;
-        } else {
-            newNode->next = NULL;
-            newNode->prev = list.tail;
-            list.tail->next = newNode;
-            list.tail = newNode;
-        }
-        list.size++;
-        leftNumber = rightNumber; // Prepare for the next operation
+        node->left = left;
+        node->right = right;
+        node->operation = op;
+        node->next = NULL;
+        node->prev = list->tail;
+
+        if (list->tail) list->tail->next = node;
+        else            list->head = node;
+        list->tail = node;
+        list->size++;
+
+        left = right; // operands dublicates through nodes
     }
-    return 1; // Successfully tokenized the expression
+    return 1;
 
+fail:
+    freeList(list); //free all allocated nodes in case of failure
+    return 0;
 }
 
 int takeOneNumber(char **expression, double *number) {
@@ -134,29 +123,31 @@ int takeOneOperation(char **expression, Operation *operation) {
 
 
 
-int calculateExpression(CalculatorDoubleLinkedList list, CalculationMode mode, double *result) {
-    if (list.size == 0) {
-        return 0; // No operations to perform
-    }
+int calculateExpression(CalculatorDoubleLinkedList *list, CalculationMode mode, double *result) {
+    CalculatorNode *n = list->head;
+    while (n) {
+        CalculatorNode *next = n->next;
+        int isMD = (n->operation == MULTIPLICATION || n->operation == DIVISION);
 
-    CalculatorNode* currentNode = list.head;
-    *result = currentNode->left; // Start with the left number of the first node
-
-    while (currentNode != NULL) {
-        if (mode == ADDITION_SUBTRACTION && (currentNode->operation == MULTIPLICATION || currentNode->operation == DIVISION)) {
-            // Skip multiplication and division in addition/subtraction mode
-            currentNode = currentNode->next;
-            continue;
+        if ((mode == MULTIPLICATION_DIVISION) == isMD) {
+            double v = solve(n->left, n->right, n->operation);
+            if (isnan(v)) return 0;              //handle division by zero or other errors
+            if (n->prev) n->prev->right = v;     //updating links
+            if (n->next) n->next->left = v;
+            *result = v;
+            removeNode(list, n);
         }
-        if (mode == MULTIPLICATION_DIVISION && (currentNode->operation == ADDITION || currentNode->operation == SUBTRACTION)) {
-            // Skip addition and subtraction in multiplication/division mode
-            currentNode = currentNode->next;
-            continue;
-        }
-        *result = solve(*result, currentNode->right, currentNode->operation);
-        currentNode = currentNode->next;
+        n = next;
     }
-    return 1; // Successfully calculated the expression
+    return 1;
+}
+static void removeNode(CalculatorDoubleLinkedList *list, CalculatorNode *n) {
+    if (n->prev) n->prev->next = n->next; else list->head = n->next;
+    if (n->next) n->next->prev = n->prev; else list->tail = n->prev;
+    free(n);
+    list->size--;
 }
 
-
+void freeList(CalculatorDoubleLinkedList *list) {
+    while (list->head) removeNode(list, list->head);
+}
