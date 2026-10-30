@@ -23,6 +23,11 @@ typedef struct CalculatorDoubleLinkedList {
     size_t size;
 } CalculatorDoubleLinkedList;
 
+typedef enum CalculationMode {
+    ADDITION_SUBTRACTION,
+    MULTIPLICATION_DIVISION
+} CalculationMode;
+
 double add(double a, double b);
 double subtract(double a, double b);
 double multiply(double a, double b);
@@ -33,5 +38,13 @@ double solve(double left, double right, Operation operation);
 //functions to work with char*
 int removeSpaces(char* str);
 int isValidExpression(const char* expression);
+int isDigit(char c);
+int isOperator(char c);
+//functions to work with CalculatorDoubleLinkedList
+int tokenize(char* expression, CalculatorDoubleLinkedList list);
+int takeOneNumber(char **expression, double *number);
+int takeOneOperation(char **expression, Operation *operation);
+int calculateExpression(CalculatorDoubleLinkedList list, CalculationMode mode, double *result);
+
 
 #endif
