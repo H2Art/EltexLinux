@@ -44,6 +44,6 @@ int main(int argc, char *argv[]) {
         uint32_t randIpSubnet = getSubnetIp(randIp, mask);
         if (isInSameSubnet(randIpSubnet, gatewayIpSubnet) == 0) { total++; }
     }
-    printf("%f%%\n", (double)total / (double)N * 100);
+    printf("%f%% of packets reached gateway.\n", (double)total / (double)N * 100);
     return 0;
 }
