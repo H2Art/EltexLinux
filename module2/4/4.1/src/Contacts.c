@@ -73,7 +73,7 @@ int contactSetItems(Contact *c, ItemType type, int n, const char items[][MAX_LEN
     return CONTACT_OK;
 }
 
-/* Ключ: фамилия; при равенстве имя, затем отчество */
+// Key: Lastname; if equal, then Firstname, then Middlename
 int contactCompare(const Contact *a, const Contact *b) {
     int r = strcasecmp(a->name.lastName, b->name.lastName);
     if (r) return r;
@@ -82,8 +82,9 @@ int contactCompare(const Contact *a, const Contact *b) {
     return strcasecmp(a->name.middleName, b->name.middleName);
 }
 
-/* ---------- список ---------- */
 
+
+//List functions
 void listAttachSorted(ContactList *l, Node *n) {
     Node *p = l->head;
     while (p && contactCompare(&p->data, &n->data) <= 0) p = p->next; /* равные идут после */
@@ -92,8 +93,8 @@ void listAttachSorted(ContactList *l, Node *n) {
     if (p) { n->prev = p->prev; p->prev = n; }
     else   { n->prev = l->tail; l->tail = n; }
 
-    if (n->prev) n->prev->next = n;
-    else         l->head = n;
+    if (n->prev) { n->prev->next = n; }
+    else { l->head = n; }
     l->count++;
 }
 
