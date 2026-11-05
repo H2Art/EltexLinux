@@ -2,11 +2,10 @@
 #include <string.h>
 #include "main.h"
 
-/* ---------- ввод ---------- */
-
+//input
 int readLine(FILE *in, char *buf, size_t size) {
     if (!fgets(buf, (int)size, in)) { buf[0] = '\0'; return 0; }
-    if (!strchr(buf, '\n')) {                      /* строка длиннее буфера: сбросить хвост */
+    if (!strchr(buf, '\n')) {                      //string is too long, flush the rest of the line
         int ch;
         while ((ch = getc(in)) != '\n' && ch != EOF) { }
     }
@@ -17,12 +16,13 @@ int readLine(FILE *in, char *buf, size_t size) {
 int readInt(FILE *in, int *out) {
     char buf[16];
     if (!readLine(in, buf, sizeof buf)) return 0;
-    *out = (int)strtol(buf, NULL, 10);             /* нечисловой ввод даст 0 */
+    *out = (int)strtol(buf, NULL, 10);             //non-numeric input will be converted to 0
     return 1;
 }
 
-/* ---------- вывод ---------- */
 
+
+//output
 void printMainOptions(void) {
     printf("\nChoose an option:\n"
            "1. Add contact\n"
@@ -31,6 +31,7 @@ void printMainOptions(void) {
            "4. Delete current contact\n"
            "5. Print current contact\n"
            "6. Select contact by index\n"
+           "7. Show tree structure\n"
            "9. Exit\n");
 }
 
@@ -50,17 +51,34 @@ void printContact(const Contact *c) {
     for (int i = 0; i < c->linkCount; i++) printf("  %s\n", c->links[i]);
 }
 
-void printList(const ContactList *l) {
-    if (l->count == 0) { printf("Contact list is empty.\n"); return; }
+void printList(const ContactTree *t) {
+    if (t->count == 0) { printf("Contact list is empty.\n"); return; }
     int i = 0;
-    for (const Node *p = l->head; p; p = p->next, i++) {
+    for (const Node *p = treeMin(t->root); p; p = treeNext(p), i++) {
         printf("%d. %s %s %s\n", i, p->data.name.lastName, p->data.name.firstName,
                p->data.name.middleName);
     }
 }
 
-/* ---------- диалоги ---------- */
+// Sideways tree: right subtree on top, left on the bottom, root at the left edge
+static void printTreeRec(const Node *n, int depth) {
+    if (!n) return;
+    printTreeRec(n->right, depth + 1);
+    printf("%*s[%c] %s %s %s\n", depth * 6, "", n->color == RB_RED ? 'R' : 'B',
+           n->data.name.lastName, n->data.name.firstName, n->data.name.middleName);
+    printTreeRec(n->left, depth + 1);
+}
 
+void printTree(const ContactTree *t) {
+    if (t->count == 0) { printf("Tree is empty.\n"); return; }
+    printf("Tree (root at the left, right subtree on top; R = red, B = black):\n");
+    printTreeRec(t->root, 0);
+    int bh = treeValidate(t);
+    if (bh < 0) printf("Validation: FAILED\n");
+    else        printf("Validation: OK (nodes: %d, black height: %d)\n", t->count, bh);
+}
+
+//dialog functions
 int askName(Contact *c, FILE *in) {
     char f[MAX_LENGTH], m[MAX_LENGTH], l[MAX_LENGTH];
     printf("First name (required): ");  if (!readLine(in, f, sizeof f)) return CONTACT_ERR_NULL_ARG;
@@ -90,8 +108,8 @@ int askItems(Contact *c, ItemType type, FILE *in) {
     return contactSetItems(c, type, n, buffer);
 }
 
-/* ---------- обработка меню ---------- */
 
+//
 static void report(int status) {
     if (status != CONTACT_OK) printf("Error: %s\n", contactStatusString(status));
 }
@@ -99,7 +117,7 @@ static void report(int status) {
 int processEditChoice(AppState *st, int choice, FILE *in) {
     if (!st->current) { printf("No contact selected.\n"); return CONTACT_ERR_NULL_ARG; }
 
-    Contact tmp = st->current->data;     /* правим копию, чтобы не получить частичную запись */
+    Contact tmp = st->current->data;     //modify a copy, and only if everything is ok, save it back to the list
     int result;
 
     switch (choice) {
@@ -113,9 +131,8 @@ int processEditChoice(AppState *st, int choice, FILE *in) {
     }
 
     if (result == CONTACT_OK) {
-        st->current->data = tmp;
-        listReposition(&st->list, st->current);   /* фамилия могла измениться */
-        printf("Saved.\n");
+        result = treeUpdate(&st->tree, st->current, &tmp);   //duplicate check, reposition and rebalance
+        if (result == CONTACT_OK) printf("Saved.\n");
     }
     return result;
 }
@@ -130,7 +147,7 @@ int processMainChoice(AppState *st, int choice, FILE *in) {
         if (result == CONTACT_OK) result = askWork(&c, in);
         if (result == CONTACT_OK) {
             Node *n = NULL;
-            result = listInsert(&st->list, &c, &n);
+            result = treeInsert(&st->tree, &c, &n);
             if (result == CONTACT_OK) {
                 st->current = n;
                 printf("Contact added and selected. Use 'Edit' to add phones, emails, links.\n");
@@ -139,7 +156,7 @@ int processMainChoice(AppState *st, int choice, FILE *in) {
         break;
     }
     case UO_LIST:
-        printList(&st->list);
+        printList(&st->tree);
         break;
     case UO_EDIT:
         printEditOptions();
@@ -151,7 +168,7 @@ int processMainChoice(AppState *st, int choice, FILE *in) {
         break;
     case UO_DELETE:
         if (!st->current) { printf("No contact selected.\n"); return CONTACT_ERR_NULL_ARG; }
-        result = listRemove(&st->list, st->current);
+        result = treeRemove(&st->tree, st->current);
         if (result == CONTACT_OK) { st->current = NULL; printf("Deleted.\n"); }
         break;
     case UO_PRINT:
@@ -159,17 +176,20 @@ int processMainChoice(AppState *st, int choice, FILE *in) {
         printContact(&st->current->data);
         break;
     case UO_SELECT: {
-        if (st->list.count == 0) { printf("Contact list is empty.\n"); return CONTACT_ERR_BAD_INDEX; }
-        printList(&st->list);
-        printf("Index (0-%d): ", st->list.count - 1);
+        if (st->tree.count == 0) { printf("Contact list is empty.\n"); return CONTACT_ERR_BAD_INDEX; }
+        printList(&st->tree);
+        printf("Index (0-%d): ", st->tree.count - 1);
         int idx;
         if (!readInt(in, &idx)) { st->running = 0; return CONTACT_OK; }
-        Node *n = listGetAt(&st->list, idx);
+        Node *n = treeGetAt(&st->tree, idx);
         if (!n) { result = CONTACT_ERR_BAD_INDEX; break; }
         st->current = n;
         printf("Contact %d selected.\n", idx);
         break;
     }
+    case UO_TREE:
+        printTree(&st->tree);
+        break;
     case UO_EXIT:
         st->running = 0;
         break;
@@ -182,17 +202,15 @@ int processMainChoice(AppState *st, int choice, FILE *in) {
     return result;
 }
 
-#ifndef UNIT_TEST
 int main(void) {
     AppState st = {0};
     st.running = 1;
     while (st.running) {
         int choice;
         printMainOptions();
-        if (!readInt(stdin, &choice)) break;      /* EOF */
+        if (!readInt(stdin, &choice)) break;      //EOF
         processMainChoice(&st, choice, stdin);
     }
-    listFree(&st.list);
+    treeFree(&st.tree);
     return 0;
 }
-#endif

@@ -5,7 +5,7 @@
 #include "Contacts.h"
 
 typedef struct AppState {
-    ContactList list;
+    ContactTree tree;
     Node       *current;   /* выбранный контакт или NULL */
     int         running;
 } AppState;
@@ -17,6 +17,7 @@ typedef enum {
     UO_DELETE = 4,
     UO_PRINT = 5,
     UO_SELECT = 6,
+    UO_TREE = 7,
     UO_EXIT = 9
 } UserOption;
 
@@ -35,7 +36,8 @@ int  readInt(FILE *in, int *out);                  /* 1 = ok, 0 = EOF */
 void printMainOptions(void);
 void printEditOptions(void);
 void printContact(const Contact *c);
-void printList(const ContactList *l);
+void printList(const ContactTree *t);
+void printTree(const ContactTree *t);
 
 int  processMainChoice(AppState *st, int choice, FILE *in);
 int  processEditChoice(AppState *st, int choice, FILE *in);

@@ -20,24 +20,30 @@ typedef struct Contact {
     WorkInformation workInfo;
     char phones[MAX_ITEMS][MAX_LENGTH];
     char emails[MAX_ITEMS][MAX_LENGTH];
-    char links[MAX_ITEMS][MAX_LENGTH];   /* соцсети и мессенджеры */
+    char links[MAX_ITEMS][MAX_LENGTH];   // Links, Phones, Emails
     int  phoneCount;
     int  emailCount;
     int  linkCount;
 } Contact;
 
-/* Двухсвязный список, упорядочен по фамилии */
+// Red-black tree. Key: lastName -> firstName -> middleName (case-insensitive), keys are unique
+typedef enum {
+    RB_RED,
+    RB_BLACK
+} NodeColor;
+
 typedef struct Node {
-    Contact      data;
-    struct Node *prev;
-    struct Node *next;
+    Contact       data;
+    NodeColor     color;
+    struct Node  *left;
+    struct Node  *right;
+    struct Node  *parent;
 } Node;
 
-typedef struct ContactList {
-    Node *head;
-    Node *tail;
+typedef struct ContactTree {
+    Node *root;
     int   count;
-} ContactList;
+} ContactTree;
 
 typedef enum {
     ITEM_PHONE,
@@ -54,26 +60,34 @@ typedef enum {
     CONTACT_ERR_BAD_COUNT = -5,
     CONTACT_ERR_UNKNOWN_TYPE = -6,
     CONTACT_ERR_EMPTY_ITEM = -7,
-    CONTACT_ERR_NO_MEMORY = -8
+    CONTACT_ERR_NO_MEMORY = -8,
+    CONTACT_ERR_DUPLICATE = -9
 } ContactStatus;
 
 const char *contactStatusString(int status);
 
-/* Contact */
+//Contact functions
 int isBlank(const char *s);
 int contactSetName(Contact *c, const char *first, const char *middle, const char *last);
 int contactSetWork(Contact *c, const char *position, const char *company);
-/* Заменяет ВСЕ элементы типа type; при ошибке контакт не меняется */
+
+//Changing all items of a specific type; if an error occurs, the contact remains unchanged
 int contactSetItems(Contact *c, ItemType type, int n, const char items[][MAX_LENGTH]);
 int contactCompare(const Contact *a, const Contact *b);
 
-/* List */
-int   listInsert(ContactList *l, const Contact *c, Node **out);
-void  listDetach(ContactList *l, Node *n);
-void  listAttachSorted(ContactList *l, Node *n);
-void  listReposition(ContactList *l, Node *n);  /* после смены фамилии */
-int   listRemove(ContactList *l, Node *n);
-Node *listGetAt(const ContactList *l, int index);
-void  listFree(ContactList *l);
+// Tree functions
+// Insert a copy of c; CONTACT_ERR_DUPLICATE if a contact with the same full name exists
+int   treeInsert(ContactTree *t, const Contact *c, Node **out);
+// Replace data of node n with newData (the node pointer stays valid).
+// CONTACT_ERR_DUPLICATE if newData collides with ANOTHER node; on error nothing changes
+int   treeUpdate(ContactTree *t, Node *n, const Contact *newData);
+int   treeRemove(ContactTree *t, Node *n);
+Node *treeFind(const ContactTree *t, const Contact *key);
+Node *treeMin(const Node *n);                          // leftmost node of the subtree
+Node *treeNext(const Node *n);                         // in-order successor or NULL
+Node *treeGetAt(const ContactTree *t, int index);      // index in sorted order
+void  treeFree(ContactTree *t);
+// Checks red-black properties and ordering. Returns black height (>= 0) or -1 if broken
+int   treeValidate(const ContactTree *t);
 
 #endif
