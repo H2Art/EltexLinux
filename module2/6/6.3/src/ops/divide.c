@@ -8,3 +8,4 @@ double operation(double a, double b) {
 }
 
 const char symbol = '/';
+const int priority = 1;

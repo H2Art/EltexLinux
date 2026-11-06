@@ -1,7 +1,8 @@
 CFLAGS = -Wall -Wextra -g -fsanitize=address,undefined -Isrc
 BUILD  = build
 OPS    = $(BUILD)/ops
-LIBS   = $(OPS)/libadd.so $(OPS)/libsubtract.so $(OPS)/libmultiply.so $(OPS)/libdivide.so
+SRC_OPS = $(wildcard src/ops/*.c)
+LIBS    = $(patsubst src/ops/%.c,$(OPS)/lib%.so,$(SRC_OPS))
 
 all: $(BUILD)/calculator $(LIBS)
 

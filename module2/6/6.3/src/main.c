@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
             break;
         }
         removeSpaces(input);
-        if (!isValidExpression(input) || !tokenize(input, &list, &ops)) {
+        if (!isValidExpression(input, &ops) || !tokenize(input, &list, &ops)) {
             printf("Invalid expression or operation is not loaded.\n");
             freeList(&list);
             continue;
@@ -38,8 +38,8 @@ int main(int argc, char **argv) {
         double result = 0;
         if (list.size == 0) {
             result = strtod(input, NULL);
-        } else if (!calculateExpression(&list, MULTIPLICATION_DIVISION, &result) ||
-                !calculateExpression(&list, ADDITION_SUBTRACTION, &result)) {
+        } else if (!calculateExpression(&list, PRIORITY_HIGH, &result) ||
+                !calculateExpression(&list, PRIORITY_LOW, &result)) {
             printf("Error (division by zero).\n");
             freeList(&list);
             continue;

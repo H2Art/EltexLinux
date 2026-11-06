@@ -22,13 +22,13 @@ int removeSpaces(char* str) {
     *dest = '\0'; // Null-terminate the modified string
     return 0; // Return 0 to indicate success
 }
-int isValidExpression(const char* expression) {
+int isValidExpression(const char* expression, const OperationTable *ops) {
     if (expression == NULL || *expression == '\0') {
         return 0; // Invalid if the expression is NULL or empty
     }
 
     while (*expression != '\0') {
-        if (!(isDigit(*expression) || isOperator(*expression) || *expression == '.')) {
+        if (!(isDigit(*expression) || hasOperation(ops, *expression) || *expression == '.')) {
             return 0; // Invalid character found
         }
         expression++;
@@ -36,16 +36,13 @@ int isValidExpression(const char* expression) {
     return 1; // Valid expression
 }
 
-int isOperator(char c) {
-    return (c == '+' || c == '-' || c == '*' || c == '/');
-}
 int isDigit(char c) {
     return (c >= '0' && c <= '9');
 }
 
 int tokenize(char *expr, CalculatorDoubleLinkedList *list, const OperationTable *ops) {
     double left, right;
-    Operation op;
+    char op;
 
     if (!takeOneNumber(&expr, &left)) return 0;
 
@@ -59,7 +56,8 @@ int tokenize(char *expr, CalculatorDoubleLinkedList *list, const OperationTable 
         node->left = left;
         node->right = right;
         node->operation = op;
-        node->func = ops->func[(unsigned char)op];
+        node->func = getOperation(ops, op);
+        node->priority = getPriority(ops, op);
         node->next = NULL;
         node->prev = list->tail;
 
@@ -87,10 +85,10 @@ int takeOneNumber(char **expression, double *number) {
     return 1; // Number successfully parsed
 }
 
-int takeOneOperation(char **expression, Operation *operation, const OperationTable *ops) {
+int takeOneOperation(char **expression, char *operation, const OperationTable *ops) {
     char c = **expression;
-    if (isOperator(c) && ops->func[(unsigned char)c]) {
-        *operation = (Operation)c;
+    if (hasOperation(ops, c)) {
+        *operation = c;
         (*expression)++; // Move the pointer forward
         return 1; // Operation successfully parsed
     }
@@ -99,13 +97,12 @@ int takeOneOperation(char **expression, Operation *operation, const OperationTab
 
 
 
-int calculateExpression(CalculatorDoubleLinkedList *list, CalculationMode mode, double *result) {
+int calculateExpression(CalculatorDoubleLinkedList *list, int priority, double *result) {
     CalculatorNode *n = list->head;
     while (n) {
         CalculatorNode *next = n->next;
-        int isMD = (n->operation == MULTIPLICATION || n->operation == DIVISION);
 
-        if ((mode == MULTIPLICATION_DIVISION) == isMD) {
+        if (n->priority == priority) {
             double v = solve(n->left, n->right, n->func);
             if (isnan(v)) return 0;              //handle division by zero or other errors
             if (n->prev) n->prev->right = v;     //updating links
