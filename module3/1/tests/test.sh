@@ -1,5 +1,6 @@
 #!/bin/bash
-BIN=$(realpath ./build/filecopy)
+# Путь от расположения скрипта: запускать можно из любой папки
+BIN=$(realpath "$(dirname "$0")/../build/filecopy")
 T=$(mktemp -d)
 trap 'rm -rf "$T"' EXIT
 pass=0; fail=0

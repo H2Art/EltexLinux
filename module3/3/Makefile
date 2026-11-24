@@ -25,7 +25,7 @@ unit: $(BUILD)/test_chat
 	./$(BUILD)/test_chat
 
 test: $(TARGET) unit
-	./test.sh
+	./tests/test.sh
 
 clean:
 	rm -rf $(BUILD)

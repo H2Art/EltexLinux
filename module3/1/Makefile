@@ -16,7 +16,7 @@ $(BUILD):
 	mkdir -p $@
 
 test: $(TARGET)
-	./test.sh
+	./tests/test.sh
 
 clean:
 	rm -rf $(BUILD)

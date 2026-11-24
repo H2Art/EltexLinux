@@ -1,6 +1,6 @@
 #!/bin/bash
 # Интеграционный тест: два процесса чата, ввод подаём через именованные каналы.
-BIN=$(realpath ./build/chat)
+BIN=$(realpath "$(dirname "$0")/../build/chat")
 T=$(mktemp -d)
 NAME="chat_test_$$"
 pass=0; fail=0

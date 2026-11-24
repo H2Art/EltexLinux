@@ -29,7 +29,7 @@ unit: $(BUILD)/test_common $(BUILD)/test_registry
 	./$(BUILD)/test_registry
 
 test: $(TARGET) unit
-	./test.sh
+	./tests/test.sh
 
 clean:
 	rm -rf $(BUILD)

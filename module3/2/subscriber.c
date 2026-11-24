@@ -85,8 +85,8 @@ int subscriber_run(char *const topics[], int n)
     if (rc == 0 && !gone && !g_stop)
         rc = receive_loop(qid, &gone);
 
-    /* Брокеру нужно сообщить об уходе, пока очередь жива: при его остановке она ещё
-     * существует, пока он ждёт, и отписка успевает дойти */
+    /* Брокеру нужно сообщить об уходе, пока очередь жива. Если брокер остановился сам,
+     * он обычно успевает удалить очередь раньше, и отписывать уже некого (gone) */
     for (i = 0; i < n && !gone; i++)
         if (send_cmd(qid, CMD_UNSUBSCRIBE, topics[i], NULL) < 0)
             gone = queue_gone(errno);
