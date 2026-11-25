@@ -40,18 +40,13 @@ int pc_create(struct pc *p, key_t key, size_t size)
         errno = EINVAL;
         return -1;
     }
-    p->shmid = -1;
+    p->shmid = p->semid = -1;
     p->base = NULL;
     p->size = size;
-    /* Семафор создаём первым. Пока он не выставлен в 1, это закрытый замок
-     * (Linux создаёт семафоры с 0; POSIX значение не гарантирует, поэтому SETVAL ниже обязателен).
-     * Потребитель, пришедший в этот момент, подождёт в semop, пока разметка не готова. */
-    p->semid = semget(key, 1, IPC_CREAT | IPC_EXCL | 0600);
-    if (p->semid < 0)
-        return -1;
+    /* IPC_EXCL на сегменте: второй производитель упадёт здесь, ничего не тронув */
     p->shmid = shmget(key, size, IPC_CREAT | IPC_EXCL | 0600);
     if (p->shmid < 0)
-        goto fail;
+        return -1;
     p->base = shmat(p->shmid, NULL, 0);
     if (p->base == (void *)-1) {
         p->base = NULL;
@@ -61,6 +56,12 @@ int pc_create(struct pc *p, key_t key, size_t size)
     h->done = 0;
     h->last = 0;
     h->end = PC_FIRST;
+    /* Семафор создаём последним: потребитель ищет его первым, и если нашёл,
+     * сегмент уже размечен. До SETVAL замок закрыт (Linux создаёт семафоры с 0;
+     * POSIX значение не гарантирует, поэтому SETVAL обязателен), потребитель подождёт в semop. */
+    p->semid = semget(key, 1, IPC_CREAT | IPC_EXCL | 0600);
+    if (p->semid < 0)
+        goto fail;
     if (semctl(p->semid, 0, SETVAL, arg) < 0)
         goto fail;
     return 0;
