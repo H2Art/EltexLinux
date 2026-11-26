@@ -154,7 +154,9 @@ int chat_recv(struct chat *c, struct chat_msg *m, struct sockaddr_in *src)
         return errno == EINTR ? 0 : -1;
     if (chat_parse(buf, n, m) < 0)
         return 0;       /* на порт может прийти что угодно, не только от нас */
-    return m->id != c->id;      /* broadcast возвращается и отправителю */
+    /* broadcast возвращается и отправителю. Своим считаем только при совпадении id и имени:
+     * если у двоих случайно совпадёт id, они не станут молча невидимы друг для друга. */
+    return m->id != c->id || strcmp(m->name, c->name) != 0;
 }
 
 static int show_one(struct chat *c)

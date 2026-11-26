@@ -109,6 +109,20 @@ static void test_broadcast_reaches_others_and_echo_is_skipped(void)
     TEST_ASSERT_EQUAL_INT(0, recv_wait(&a, &m));      /* своё эхо пришло, но пропущено */
 }
 
+/* Совпавший id при разных именах не прячет собеседника */
+static void test_same_id_different_name_is_not_echo(void)
+{
+    struct chat_msg m;
+
+    TEST_ASSERT_EQUAL_INT(0, chat_open(&a, "alice", LOOP_BCAST, TEST_PORT));
+    TEST_ASSERT_EQUAL_INT(0, chat_open(&b, "bob", LOOP_BCAST, TEST_PORT));
+    b.id = a.id;
+    TEST_ASSERT_EQUAL_INT(0, chat_send(&b, MSG_TEXT, "can you see me"));
+    TEST_ASSERT_EQUAL_INT(1, recv_wait(&a, &m));
+    TEST_ASSERT_EQUAL_STRING("bob", m.name);
+    TEST_ASSERT_EQUAL_INT(0, recv_wait(&b, &m));      /* своё эхо bob по-прежнему пропущено */
+}
+
 int main(void)
 {
     UNITY_BEGIN();
@@ -118,5 +132,6 @@ int main(void)
     RUN_TEST(test_parse_rejects_garbage);
     RUN_TEST(test_open_rejects_bad_address);
     RUN_TEST(test_broadcast_reaches_others_and_echo_is_skipped);
+    RUN_TEST(test_same_id_different_name_is_not_echo);
     return UNITY_END();
 }
