@@ -1,0 +1,4 @@
+cd ~/Claude/projects/Eltex/module3/6 && make
+podman run -it --rm --network chatnet -v ./build:/chat:ro,Z registry.fedoraproject.org/fedora:43 /chat/chat alice 10.89.0.255
+podman run -it --rm --network chatnet -v ./build:/chat:ro,Z registry.fedoraproject.org/fedora:43 /chat/chat bob 10.89.0.255
+podman run -it --rm --network chatnet -v ./build:/chat:ro,Z registry.fedoraproject.org/fedora:43 /chat/chat carol 10.89.0.255
