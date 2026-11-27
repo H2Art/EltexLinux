@@ -16,7 +16,7 @@
 struct client {
     int fd;                     /* -1: слот свободен */
     int dead;                   /* отключить после обработки текущих событий */
-    int want_out;               /* EPOLLOUT сейчас включён */
+    int want_out;               /*  OUT сейчас включён */
     char name[NAME_LEN];        /* пусто, пока не пришёл HELLO */
     struct buf in, out;
 };
